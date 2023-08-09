@@ -2,7 +2,7 @@ name: Tpu-mlir Regression Testing
 
 on:
   push:
-      tags:
+    
         
 
 
