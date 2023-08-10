@@ -12,11 +12,7 @@ jobs:
     - name: 检出代码
       uses: actions/checkout@v2
     
-    - name: 哈希处理 package-lock.json 文件
-      run: |
-    - name: Calculate hash of package-lock.json
-      run: |
-        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+  
 
 
     - name: Build
@@ -30,5 +26,31 @@ jobs:
     - name: Pull Docker images
       run: |
           docker pull sophgo/tpuc_dev:latest
+    - name: Run Docker Container and YOLOv5 Test
+      run: |
+          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
+      
+          source ./envsetup.sh
+          ./build.sh
+
+          mkdir model_yolov5s && cd model_yolov5s
+          cp ${REGRESSION_PATH}/model/yolov5s.onnx .
+          cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
+          cp -rf ${REGRESSION_PATH}/image .
+          mkdir workspace && cd workspace
+          
+          ########### Model to MLIR ###############
+          
+        
+             
+           ############   yolov5 regression test   ###########
+             - name:  yolov5 regression test
+           cd ..
+           cd ..
+           cd regression 
+           ./run.sh
+           
+           
+          '
 
   
