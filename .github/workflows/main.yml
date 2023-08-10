@@ -50,11 +50,9 @@ jobs:
         
              
            ############   yolov5 regression test   ###########
-             - name:  yolov5 regression test
-           cd ..
-           cd ..
-           cd regression 
-           ./run.sh
+          cd ..
+          cd ..
+          cd regression 
            
            
           '
