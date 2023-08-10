@@ -2,8 +2,8 @@ name: Tpu-mlir Regression Testing
 
 on:
   push:
-    
-        
+    branches:
+      - main
 
 jobs:
   reuse_image:
@@ -13,27 +13,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
- # 第二步：打包构建
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Build
-        uses: actions/setup-node@master
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
       - run: npm init -y
-      - run: npm run build --if-present # 打包
-      - run: tar -zcvf release.tgz  package.json 
-      # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
-
-
- 
-
+      - run: npm run build --if-present
+      - run: tar -zcvf release.tgz package.json
 
       - name: Pull Docker images
         run: |
           docker pull sophgo/tpuc_dev:latest
 
-
       - name: Run Docker Container and YOLOv5 Test
         run: |
           docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
-
       
           source ./envsetup.sh
           ./build.sh
@@ -57,13 +59,3 @@ jobs:
            
            
           '
-
-
-          
-
-
-          
-
-
-
-
