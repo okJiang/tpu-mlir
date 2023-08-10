@@ -16,7 +16,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles(find('**/package-lock.json')) }}
+
           restore-keys: |
             ${{ runner.os }}-node-
 
@@ -32,27 +33,4 @@ jobs:
         run: |
           docker pull sophgo/tpuc_dev:latest
 
-      - name: Run Docker Container and YOLOv5 Test
-        run: |
-          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
-      
-          source ./envsetup.sh
-          ./build.sh
-
-          mkdir model_yolov5s && cd model_yolov5s
-          cp ${REGRESSION_PATH}/model/yolov5s.onnx .
-          cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
-          cp -rf ${REGRESSION_PATH}/image .
-          mkdir workspace && cd workspace
-          
-          ########### Model to MLIR ###############
-          
-        
-             
-           ############   yolov5 regression test   ###########
-          cd ..
-          cd ..
-          cd regression 
-           
-           
-          '
+  
