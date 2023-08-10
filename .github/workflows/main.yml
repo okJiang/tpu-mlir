@@ -15,11 +15,9 @@ jobs:
       run: |
     - name: Calculate hash of package-lock.json
       run: |
-         find . -name 'package-lock.json' -exec sha256sum {} \; > hashes.txt
 
+            key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
-          restore-keys: |
-            ${{ runner.os }}-node-
 
     - name: Build
       uses: actions/setup-node@v2
