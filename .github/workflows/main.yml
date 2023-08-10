@@ -15,8 +15,7 @@ jobs:
       run: |
     - name: Calculate hash of package-lock.json
       run: |
-
-            key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
 
     - name: Build
