@@ -1,21 +1,16 @@
 name: Tpu-mlir Regression Testing
 
-
 on: [push]
 
 jobs:
   hash_files:
     runs-on: ubuntu-latest
     
-    
     steps:
     - name: 检出代码
       uses: actions/checkout@v2
     
-  
-
-
-    - name: Build
+    - name: 设置 Node.js
       uses: actions/setup-node@v2
       with:
        node-version: '14'
@@ -32,7 +27,6 @@ jobs:
       
           source ./envsetup.sh
           ./build.sh
-
           mkdir model_yolov5s && cd model_yolov5s
           cp ${REGRESSION_PATH}/model/yolov5s.onnx .
           cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
@@ -40,17 +34,33 @@ jobs:
           mkdir workspace && cd workspace
           
           ########### Model to MLIR ###############
-          
         
-             
+          # 在此处添加命令并将输出保存到日志文件
+          model_transform.py \
+             --model_name yolov5s \
+             --model_def ../yolov5s.onnx \
+             --input_shapes [[1,3,640,640]] \
+             --mean 0.0,0.0,0.0 \
+             --scale 0.0039216,0.0039216,0.0039216 \
+             --keep_aspect_ratio \
+             --pixel_format rgb \
+             --output_names 350,498,646 \
+             --test_input ../image/dog.jpg \
+             --test_result yolov5s_top_outputs.npz \
+             --mlir yolov5s.mlir >> output.log  # 保存输出到日志文件
+
            ############   yolov5 regression test   ###########
              - name:  yolov5 regression test
            cd ..
            cd ..
            cd regression 
-           ./run.sh
+           ./run.sh >> output.log  # 保存输出到日志文件
            
            
           '
 
-  
+    - name: 上传日志工件
+      uses: actions/upload-artifact@v2
+      with:
+        name: logs
+        path: output.log  # 上传日志文件
