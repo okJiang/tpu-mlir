@@ -13,7 +13,10 @@ jobs:
     
     - name: 哈希处理 package-lock.json 文件
       run: |
-        find . -name 'package-lock.json' -exec sha256sum {} \; > hashes.txt
+    - name: Calculate hash of package-lock.json
+      run: |
+         find . -name 'package-lock.json' -exec sha256sum {} \; > hashes.txt
+
 
           restore-keys: |
             ${{ runner.os }}-node-
