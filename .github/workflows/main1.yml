@@ -2,8 +2,6 @@ name: Regression Testing
 
 on:
   push:
-    tags:
-      - '*'  # 以 'v' 开头的任何标签
 
 jobs:
   reuse_image:
