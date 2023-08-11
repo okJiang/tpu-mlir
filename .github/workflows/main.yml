@@ -60,7 +60,7 @@ jobs:
       
 
     - name: 上传日志工件
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v1
       with:
         name: logs
         path: output.log  # 上传日志文件
