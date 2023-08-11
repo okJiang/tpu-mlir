@@ -48,11 +48,15 @@ jobs:
              --output_names 350,498,646 \
              --test_input ../image/dog.jpg \
              --test_result yolov5s_top_outputs.npz \
-             --mlir yolov5s.mlir >> output.log 2>&1  # 保存输出和错误到日志文件
-            '
+             --mlir yolov5s.mlir >> output.log 2>&1  # 保存输出到日志文件
+            
            ############   yolov5 regression test   ###########
-
+           cd ..
+           cd ..
+           cd regression 
+           ./run.sh >> output.log 2>&1  # 保存输出到日志文件
            
+           '
       
 
     - name: 上传日志工件
