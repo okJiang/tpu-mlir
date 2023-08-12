@@ -35,7 +35,7 @@ jobs:
     - run: | 
              npm init -y
              npm run build --if-present # 打包
-             tar release.tgz
+             zip -r Resources Resources 
       # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
 
 
@@ -47,9 +47,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
       with:
-      
-        release_name: Release
-        draft: false # 是否是草稿
+        tag_name: ${{github.ref}}
+        release_name: Release${{github.ref}}
+        draft: true # 是否是草稿
         prerelease: false # 是否是预发布
 
 
