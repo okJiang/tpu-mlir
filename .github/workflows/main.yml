@@ -1,36 +1,24 @@
-name: Tpu-mlir Regression Testing
+name: Caching Primes
 
-on: [push]
+on: push
 
 jobs:
-  
-
-
   build:
-    name: Build my artifact
     runs-on: ubuntu-latest
+
     steps:
-    
-      - name: Checkout repository
-        uses: actions/checkout@v2
- 
-    
-      - name: 设置 Node.js
-        uses: actions/setup-node@master
-    
-      - run: npm init -y
-      - run: npm run build --if-present
-      
-      - name: Pull Docker images
-        run: |
-            docker pull sophgo/tpuc_dev:latest
-      - name: Run Docker Container and YOLOv5 Test
-        run: |
-          docker run --privileged --name github_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
-          cd tpu-mlir
-          source ./envsetup.sh
-          ./build.sh
-        
-           cd regression 
-           ./run.sh 
-           '
+    - uses: actions/checkout@v3
+
+    - name: Cache Primes
+      id: cache-primes
+      uses: actions/cache@v3
+      with:
+        path: prime-numbers
+        key: ${{ runner.os }}-primes
+
+    - name: Generate Prime Numbers
+      if: steps.cache-primes.outputs.cache-hit != 'true'
+      run: /generate-primes.sh -d prime-numbers
+
+    - name: Use Prime Numbers
+      run: /primes.sh -d prime-numbers
