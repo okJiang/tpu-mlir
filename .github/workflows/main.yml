@@ -25,7 +25,9 @@ jobs:
       - name: Run Docker Container and YOLOv5 Test
         run: |
           docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
-      
+          
+          source ./envsetup.sh
+          ./build.sh
         
            cd regression 
            ./run.sh 
