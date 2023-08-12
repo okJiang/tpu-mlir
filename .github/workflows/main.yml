@@ -10,31 +10,15 @@ jobs:
     name: Build my artifact
     runs-on: ubuntu-latest
     steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@v1
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-        
-      - name: Checkout
-        uses: actions/checkout@v1
-
-      - name: Build
-        run: |
-          echo "Free space:"
-          df -h
-    
-  
+     
+ 
     
       - name: 设置 Node.js
         uses: actions/setup-node@master
     
       - run: npm init -y
       - run: npm run build --if-present
-      - run: tar -zcvf release.tgz package.json
-
-  
+      
       - name: Pull Docker images
         run: |
             docker pull sophgo/tpuc_dev:latest
@@ -42,8 +26,6 @@ jobs:
         run: |
           docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
       
-          source ./envsetup.sh
-          ./build.sh
           mkdir model_yolov5s && cd model_yolov5s
           cp ${REGRESSION_PATH}/model/yolov5s.onnx .
           cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
