@@ -3,26 +3,41 @@ name: Tpu-mlir Regression Testing
 on: [push]
 
 jobs:
-  hash_files:
+  
+
+  build:
+    name: Build my artifact
     runs-on: ubuntu-latest
-    
     steps:
-    - name: 检出代码
-      uses: actions/checkout@master
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: |
+          echo "Free space:"
+          df -h
     
-    - name: 设置 Node.js
-      uses: actions/setup-node@master
+  
     
-    - run: npm init -y
-    - run: npm run build --if-present
-    - run: tar -zcvf release.tgz package.json
+      - name: 设置 Node.js
+        uses: actions/setup-node@master
+    
+      - run: npm init -y
+      - run: npm run build --if-present
+      - run: tar -zcvf release.tgz package.json
 
   
-    - name: Pull Docker images
-      run: |
-          docker pull sophgo/tpuc_dev:latest
-    - name: Run Docker Container and YOLOv5 Test
-      run: |
+      - name: Pull Docker images
+        run: |
+            docker pull sophgo/tpuc_dev:latest
+      - name: Run Docker Container and YOLOv5 Test
+        run: |
           docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
       
           source ./envsetup.sh
