@@ -34,22 +34,13 @@ jobs:
       uses: actions/setup-node@v1
     - run: | 
              npm init -y
+             npm install
              npm run build --if-present # 打包
              tar -zcvf release.tgz
+             git add .
+             git commit -m "test"
+             git push origin main
       # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
-
-
-    # 第三步：发布 Release
-    - name: Create Release # 创建Release，可以在仓库看到一个个版本
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
-      with:
-        tag_name: ${{github.ref}}
-        release_name: Release${{github.ref}}
-        draft: true # 是否是草稿
-        prerelease: false # 是否是预发布
 
 
     - name: Pull Docker images
