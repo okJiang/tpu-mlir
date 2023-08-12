@@ -27,3 +27,23 @@ jobs:
           path/to/dependencies
           some/other/dependencies
         key: ${{ steps.cache-primes-restore.outputs.cache-primary-key }}
+
+    - name: 设置 Node.js
+      uses: actions/setup-node@master
+    
+    - run: npm init -y
+    - run: npm run build --if-present
+      
+    - name: Pull Docker images
+      run: |
+            docker pull sophgo/tpuc_dev:latest
+    - name: Run Docker Container and YOLOv5 Test
+      run: |
+          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
+          
+          source ./envsetup.sh
+          ./build.sh
+        
+           cd regression 
+           ./run.sh 
+           '
