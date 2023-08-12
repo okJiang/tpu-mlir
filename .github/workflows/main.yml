@@ -10,7 +10,9 @@ jobs:
     name: Build my artifact
     runs-on: ubuntu-latest
     steps:
-     
+    
+      - name: Checkout repository
+        uses: actions/checkout@v2
  
     
       - name: 设置 Node.js
@@ -24,7 +26,7 @@ jobs:
             docker pull sophgo/tpuc_dev:latest
       - name: Run Docker Container and YOLOv5 Test
         run: |
-          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
+          docker run --privileged --name github_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
           cd tpu-mlir
           source ./envsetup.sh
           ./build.sh
