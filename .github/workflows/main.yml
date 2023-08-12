@@ -26,19 +26,7 @@ jobs:
         run: |
           docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
       
-          mkdir model_yolov5s && cd model_yolov5s
-          cp ${REGRESSION_PATH}/model/yolov5s.onnx .
-          cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
-          cp -rf ${REGRESSION_PATH}/image .
-          mkdir workspace && cd workspace
-          
-          ########### Model to MLIR ###############
         
-          # 在此处添加命令并将输出保存到日志文件
-       
-           ############   yolov5 regression test   ###########
-           cd ..
-           cd ..
            cd regression 
            ./run.sh 
            '
