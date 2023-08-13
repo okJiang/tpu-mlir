@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
 
+
     steps:
     - uses: actions/checkout@v3
 
@@ -115,9 +116,9 @@ jobs:
               --model yolov5s_1684x_int8.bmodel \
               --output dog_int8.jpg
         
-
              ./release.sh
-           '
+             
+             '
 
     # - name: Copy file from container
     #   run: docker cp myname1234:/workspace/tpu-mlir/tpu-mlir_v1.3.beta.0-20230813.tar.gz $GITHUB_WORKSPACE/
