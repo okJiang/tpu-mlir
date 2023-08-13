@@ -108,7 +108,7 @@ jobs:
               --model yolov5s_1684x_int8.bmodel \
               --output dog_int8.jpg
         
-             ./release.sh
+          
              
              '
 
