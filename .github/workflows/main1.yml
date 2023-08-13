@@ -29,15 +29,7 @@ jobs:
           some/other/dependencies
         key: ${{ steps.cache-primes-restore.outputs.cache-primary-key }}
 
-
- # 第二步：打包构建
-    - name: Build release
-      uses: actions/setup-node@v1
-    - run: | 
-            
-             npm install
-             npm run build --if-present # 打包
-             tar -zcvf release.tgz
+    
     
     - name: Pull Docker images
       run: |
