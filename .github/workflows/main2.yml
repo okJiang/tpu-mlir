@@ -34,7 +34,8 @@ jobs:
           
       - name: Save docker Container
         run:
-          docker build -t myname1234 .
+          docker buildx build -t myname1234 .
+         
           docker save -o  myname1234.tar myname1234
 
       - name: Save cache
