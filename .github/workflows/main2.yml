@@ -12,9 +12,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Set up Docker
-        uses: docker/setup-docker@v2
+        
+      - name: Pull Docker images
+        run: |
+          docker pull sophgo/tpuc_dev:latest
 
       - name: Restore cache
         uses: actions/cache@v2
