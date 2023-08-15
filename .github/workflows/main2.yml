@@ -15,23 +15,16 @@ jobs:
         
      
 
-   
-
-      - name: Pull Docker images
-        run: |
-          docker pull sophgo/tpuc_dev:latest
-      - name: Run Docker Container and YOLOv5 Test
-        run: |
-          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
-
-      
-          cd tpu-mlir
-          source ./envsetup.sh
-          ./build.sh
-           '
-         
-      - name: Save cache
-        uses: actions/cache@v2
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
         with:
-          path: /var/lib/docker
-          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to server
+        run: |
+          ssh root@49.7.219.178 "cd /qqqq && git pull origin main && docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '  source ./envsetup.sh
+          ./build.sh 
+          '
+
+         
+    
