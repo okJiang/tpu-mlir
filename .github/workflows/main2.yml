@@ -2,8 +2,8 @@ name: Cache Docker Container Build
 
 on:
   push:
-    branches:
-      - main
+  
+    
 
 jobs:
   build:
