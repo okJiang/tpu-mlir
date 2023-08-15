@@ -1,0 +1,36 @@
+name: Cache Docker Container Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: docker/setup-docker@v2
+
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: /var/lib/docker
+          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
+      - name: Build and cache container
+        run: |
+          docker build -t my-container .
+          docker save -o my-container.tar my-container
+
+      - name: Save cache
+        uses: actions/cache@v2
+        with:
+          path: /var/lib/docker
+          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
