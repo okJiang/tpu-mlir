@@ -29,8 +29,7 @@ jobs:
           source ./envsetup.sh
           ./build.sh
            '
-          docker save -ogithub_actions_test.tar github_actions_test
-
+         
       - name: Save cache
         uses: actions/cache@v2
         with:
