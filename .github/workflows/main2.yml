@@ -22,7 +22,7 @@ jobs:
             ${{ runner.os }}-docker-
       - name: Pull docker images
         run: |
-          docker pull sophgo/tpuc_dev:latest
+          docker pull sophgo/tpuc_dev:v2.2
    
       - name: Run Docker Container and YOLOv5 Test
         run: |
