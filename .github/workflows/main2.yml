@@ -16,7 +16,7 @@ jobs:
       - name: Restore cache
         uses: actions/cache@v2
         with:
-          path: /var/lib/docker
+          path:  /root/.cache/ccache
           key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-docker-
@@ -40,7 +40,7 @@ jobs:
       - name: Save cache
         uses: actions/cache@v2
         with:
-          path: /var/lib/docker
+          path: /root/.cache/ccache
           key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
 
  
