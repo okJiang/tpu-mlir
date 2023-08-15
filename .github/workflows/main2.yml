@@ -31,13 +31,7 @@ jobs:
           source ./envsetup.sh
           ./build.sh
           '
-          
-      - name: Save docker Container
-        run:
-          docker buildx build -t myname1234 .
-         
-          docker save -o  myname1234.tar myname1234
-
+      
       - name: Save cache
         uses: actions/cache@v2
         with:
