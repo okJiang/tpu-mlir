@@ -34,8 +34,8 @@ jobs:
           
       - name: Save docker Container
         run:
-       #   docker build -t myname1234 .
-          docker save -o sophgo/tpuc_dev:v2.2.tar sophgo/tpuc_dev:v2.2
+          docker build -t myname1234 .
+          docker save -o  myname1234.tar myname1234
 
       - name: Save cache
         uses: actions/cache@v2
