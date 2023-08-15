@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@v2
         
      
+ssh root@49.7.219.178 "cd /qqqq && git pull origin main && docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c \"source ./envsetup.sh && your_command_here\""
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
@@ -23,7 +24,7 @@ jobs:
         run: |
           ssh root@49.7.219.178 "cd /qqqq && git pull origin main && docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '  source ./envsetup.sh
           ./build.sh 
-          '
+          ' "
 
          
     
