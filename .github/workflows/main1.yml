@@ -1,6 +1,9 @@
 name: Regression test
 
-on: push
+on:
+  push:
+   branches:
+       - "main"
 
 jobs:
   build:
