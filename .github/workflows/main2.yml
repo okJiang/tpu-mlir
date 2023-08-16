@@ -26,9 +26,8 @@ jobs:
       - name: Run Docker Container and YOLOv5 Test
         run: |
          
-          docker cp /home/runner/work/tpu-mlir/tpu-mlir/ccache myname1234:/root/.cache
-          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 bash -c '
-          
+         
+          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 bash -c '          
         
           cd tpu-mlir
           source ./envsetup.sh
