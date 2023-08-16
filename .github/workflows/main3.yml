@@ -19,9 +19,9 @@ jobs:
 
       - name: Build
         run: | 
-           cd /home/runner/work/tpu-mlir/tpu-mlir
+          
 
-           go mod init tpu-mlir
+           go mod init 
 
            go build -o myapp
 
