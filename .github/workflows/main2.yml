@@ -17,8 +17,8 @@ jobs:
       - name: Restore cache
         uses: actions/cache@v2
         with:
-          path: ~/.cache/ccache
-          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
+          path: tpu-mlir/Dockerfile
+          key: ${{ runner.os }}-docker-${{ hashFiles(' tpu-mlir/Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-docker-
     
@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/ccache
-          key: ${{ runner.os }}-docker-${{ hashFiles('Dockerfile') }}
+          key: ${{ runner.os }}-docker-${{ hashFiles(' tpu-mlir/Dockerfile') }}
 
  
     
