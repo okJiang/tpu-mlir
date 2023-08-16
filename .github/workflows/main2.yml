@@ -35,10 +35,6 @@ jobs:
           '
          
          
-         
-      
-      - name: Save cache
-        uses: actions/cache@v2
       - name: copy
         run: docker cp myname1234:/root/.cache/ccache /home/runner/work/tpu-mlir/tpu-mlir/
       
