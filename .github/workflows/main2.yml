@@ -25,15 +25,18 @@ jobs:
    
       - name: Run Docker Container and YOLOv5 Test
         run: |
+          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2
+          exit
+          docker cp /home/runner/work/tpu-mlir/tpu-mlir/ccache myname1234:/root/.cache
           docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 bash -c '
           
-          docker cp /home/runner/work/tpu-mlir/tpu-mlir/ccache  myname1234: ~/.cache
+        
           cd tpu-mlir
           source ./envsetup.sh
           ./build.sh
-           docker cp myname1234: ~/.cache/ccache  /home/runner/work/tpu-mlir/tpu-mlir
           '
-    
+          exit 
+          docker cp myname1234:/root/.cache/ccache /home/runner/work/tpu-mlir/tpu-mlir/
       
       - name: Save cache
         uses: actions/cache@v2
