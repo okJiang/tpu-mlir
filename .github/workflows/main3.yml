@@ -25,9 +25,16 @@ jobs:
         pwd
         ls
         "
-
-    - name: Copy file from container
-      run: docker cp myname1234:/workspace/tpu-mlir_v1.3.beta.0-20230816.tar.gz $GITHUB_WORKSPACE/
+        
+    - name: Find and copy .tar.gz file
+      run: |
+          FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
+          if [ -n "$FILE_PATH" ]; then
+            docker cp myname1234:"$FILE_PATH" $GITHUB_WORKSPACE/
+          else
+            echo "File not found in container"
+          fi
+  
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
