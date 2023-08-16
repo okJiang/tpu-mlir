@@ -30,11 +30,13 @@ jobs:
           source ./envsetup.sh
           ./build.sh
           '
+      - name: Build Docker image
+        run: docker buildx -t  tpuc_dev:v2.2  tpu-mlir/Dockerfile
       
       - name: Save cache
         uses: actions/cache@v2
         with:
-          path: ~/.cache/ccache
+          path: tpu-mlir/Dockerfile
           key: ${{ runner.os }}-docker-${{ hashFiles(' tpu-mlir/Dockerfile') }}
 
  
