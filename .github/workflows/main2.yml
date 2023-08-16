@@ -18,7 +18,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /home/runner/work/tpu-mlir/tpu-mlir
-          key: ${{ runner.os }}-docker-${{ hashFiles('/home/runner/work/tpu-mlir/tpu-mlir') }}
+          key: ${{ runner.os }}-docker-${{ hashFiles('/home/runner/work/tpu-mlir/tpu-mlir/ccache') }}
           restore-keys: |
             ${{ runner.os }}-docker-
     
@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /home/runner/work/tpu-mlir/tpu-mlir
-          key: ${{ runner.os }}-docker-${{ hashFiles('/home/runner/work/tpu-mlir/tpu-mlir') }}
+          key: ${{ runner.os }}-docker-${{ hashFiles('/home/runner/work/tpu-mlir/tpu-mlir/ccache') }}
 
  
     
