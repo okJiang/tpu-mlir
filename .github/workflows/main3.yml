@@ -28,7 +28,7 @@ jobs:
           FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
           if [ -n "$FILE_PATH" ]; then
             docker cp myname1234:"$FILE_PATH" $GITHUB_WORKSPACE/
-            mv "$GITHUB_WORKSPACE/$FILE_PATH" $GITHUB_WORKSPACE/tpu-mlir_v1.3.beta.0-20230816.tar.gz
+            
           else
             echo "File not found in container"
           fi
@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./tpu-mlir_v1.3.beta.0-20230816.tar.gz
+          asset_path: /tpu-mlir
           asset_name: tpu-mlir_v1.3.beta.0-20230816.tar.gz
           asset_content_type: application/gzip
           token: ${{ secrets.TOKEN }}
