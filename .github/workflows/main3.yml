@@ -19,13 +19,15 @@ jobs:
     - name: Run Docker container
       run: |
         docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
-        cd tpu-mlir
-
+        
         ./release.sh
+
+        pwd
+        ls
         "
 
     - name: Copy file from container
-      run: docker cp myname1234:/workspace/tpu-mlir/tpu-mlir_v1.3.beta.0-20230816.tar.gz $GITHUB_WORKSPACE/
+      run: docker cp myname1234:/workspace/tpu-mlir_v1.3.beta.0-20230816.tar.gz $GITHUB_WORKSPACE/
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
