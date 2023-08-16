@@ -18,7 +18,12 @@ jobs:
           go-version: 1.16
 
       - name: Build
-        run: go build -o myapp
+        run: | 
+           cd /home/runner/work/tpu-mlir/tpu-mlir
+
+           go mod init tpu-mlir
+
+           go build -o myapp
 
       - name: Create Release
         id: create_release
