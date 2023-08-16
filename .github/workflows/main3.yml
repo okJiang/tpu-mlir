@@ -19,6 +19,7 @@ jobs:
         run: |
           docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
           ./release.sh
+          sleep infinity   # 保持容器运行
           "
 
       - name: Find and copy .tar.gz file
