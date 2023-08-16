@@ -17,8 +17,8 @@ jobs:
       - name: Restore cache
         uses: actions/cache@v2
         with:
-          path: tpu-mlir/Dockerfile
-          key: ${{ runner.os }}-docker-${{ hashFiles('tpu-mlir/Dockerfile') }}
+          path: /home/runner/work/tpu-mlir/tpu-mlir
+          key: ${{ runner.os }}-docker-${{ hashFiles('/home/runner/work/tpu-mlir/tpu-mlir') }}
           restore-keys: |
             ${{ runner.os }}-docker-
     
@@ -29,6 +29,7 @@ jobs:
           cd tpu-mlir
           source ./envsetup.sh
           ./build.sh
+           docker cp myname1234: ~/.cache/ccache  /home/runner/work/tpu-mlir/tpu-mlir
           '
       - name: Build Docker image
         run: docker buildx -t sophgo/tpuc_dev:v2.2    tpu-mlir/Dockerfile
@@ -36,8 +37,8 @@ jobs:
       - name: Save cache
         uses: actions/cache@v2
         with:
-          path: tpu-mlir/Dockerfile
-          key: ${{ runner.os }}-docker-${{ hashFiles(' tpu-mlir/Dockerfile') }}
+          path: /home/runner/work/tpu-mlir/tpu-mlir
+          key: ${{ runner.os }}-docker-${{ hashFiles('/home/runner/work/tpu-mlir/tpu-mlir') }}
 
  
     
