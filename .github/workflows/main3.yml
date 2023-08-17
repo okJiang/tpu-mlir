@@ -39,8 +39,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
         with:
-          tag_name:  tpu-mlir_v1.3.beta.0-20230813.tar.gz
-          release_name: tpu-mlir_v1.3.beta.0-20230813.tar.gz
+          tag_name:  FILE_PATH
+          release_name: FILE_PATH
           draft: false # 是否是草稿
           prerelease: false # 是否是预发布
     
