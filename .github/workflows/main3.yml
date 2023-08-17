@@ -24,10 +24,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
         with:
-          tag_name:  "$FILE_PATH123"
-          release_name: "$FILE_PATH123"
-          draft: false # 是否是草稿
-          prerelease: false # 是否是预发布
+            tag_name: V0.${{ github.run_id }}.dev
+            name: V0.${{ github.run_id }}.dev
+            body: TODO New Release.
+            draft: false  # 是否是草稿
+            prerelease: false # 是否是预览版
           
       - name: Find TAR.GZ Files
         id: find_tar_gz
