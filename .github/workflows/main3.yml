@@ -50,7 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./tpu-mlir_v1.3.beta.0-20230818.tar.gz 
+          asset_path: ${{ env.FILE_PATH }}
           asset_name: tar_gz_files.zip  # 上传后的文件名
           asset_content_type: application/zip  # 文件类型
 
