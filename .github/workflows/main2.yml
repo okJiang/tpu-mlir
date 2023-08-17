@@ -27,9 +27,8 @@ jobs:
       - name: Run Docker Container and YOLOv5 Test
         run: |
          
-          cp /home/runner/work/tpu-mlir/tpu-mlir/ccache /root/.cache/ccache  
           
-          docker run --privileged --name myname1234 -v /root/.cache/ccache sophgo/tpuc_dev:v2.2 /root/.cache/ccache     
+          docker run --privileged --name myname1234 -v /home/runner/work/tpu-mlir/tpu-mlir/ccache sophgo/tpuc_dev:v2.2 /root/.cache/ccache     
           docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 bash -c '
                       #   cp -r $GITHUB_WORKSPACE/tpu-mlir/~/.cache/ccache /root/.cache/ccache
          
