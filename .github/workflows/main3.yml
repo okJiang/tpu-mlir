@@ -38,15 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
         with:
-          tag_name: v1.1 # (tag)标签名称
-          release_name: Release v1.1
+          tag_name:  tpu-mlir_v1.3.beta.0-20230813.tar.gz
+          release_name: tpu-mlir_v1.3.beta.0-20230813.tar.gz
           draft: false # 是否是草稿
           prerelease: false # 是否是预发布
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: /release/
-          asset_name: tpu-mlir_v1.3.beta.0-20230816.tar.gz
-          asset_content_type: application/gzip
-          token: ${{ secrets.TOKEN }}
+    
