@@ -11,21 +11,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Pull Docker image
-        run: docker pull sophgo/tpuc_dev:latest
-
-      - name: Run Docker container
-        run: |
-          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
-          ./release.sh
-         
-          "
+   
      
         
 
+
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
