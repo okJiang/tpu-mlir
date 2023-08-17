@@ -1,47 +1,58 @@
 name: Upload Release Assets
 
+
 on:
   push:
-    # 配置适当的分支触发工作流
-
+  
 jobs:
-  build:
+  publish-release:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Pull Docker image
-        run: docker pull sophgo/tpuc_dev:latest
-
       - name: Run Docker container
         run: |
           docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
           ./release.sh
-
-
          
           "
+        
 
-      - name: Find and copy .tar.gz file
+      - name: Find ZIP Files
+        id: find_zip
         run: |
-          docker start myname1234
-          FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
-          if [ -n "$FILE_PATH" ]; then
-            docker cp myname1234:"$FILE_PATH" $GITHUB_WORKSPACE/
-            
-          else
-            echo "File not found in container"
-          fi
-      - name: Create Release # 创建Release，可以在仓库看到一个个版本
+          find . -type f -name "*.zip" -exec echo {} + > zip_files.txt
+        continue-on-error: true
+
+      - name: Read ZIP File List
+        id: read_zip_list
+        run: |
+          cat zip_files.txt
+        continue-on-error: true
+
+      - name: Create Release
         id: create_release
-        uses: actions/create-release@master
+        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-          tag_name:  "$FILE_PATH"
-          release_name: "$FILE_PATH"
-          draft: false # 是否是草稿
-          prerelease: false # 是否是预发布
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        id: upload_release_assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.read_zip_list.outputs.stdout }}  # 使用查找的文件列表
+          asset_name: archive.zip  # 上传后的文件名
+          asset_content_type: application/zip  # 文件类型
+
+
     
