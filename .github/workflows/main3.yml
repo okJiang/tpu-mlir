@@ -46,7 +46,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: /tpu-mlir
+          asset_path: /release/
           asset_name: tpu-mlir_v1.3.beta.0-20230816.tar.gz
           asset_content_type: application/gzip
           token: ${{ secrets.TOKEN }}
