@@ -16,16 +16,16 @@ jobs:
         
 
 
-      - name: Create Release
+      - name: Create Release # 创建Release，可以在仓库看到一个个版本
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
         with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release v${{ github.run_number }}
-          draft: false
-          prerelease: false
+          tag_name:  "$FILE_PATH"
+          release_name: "$FILE_PATH"
+          draft: false # 是否是草稿
+          prerelease: false # 是否是预发布
 
       - name: Upload Release Assets
         id: upload_release_assets
