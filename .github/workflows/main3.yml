@@ -23,10 +23,16 @@ jobs:
      
         
 
-      - name: Read ZIP.GZ File List
-        id: read_zip_gz_list
+      - name: Find TAR.GZ Files
+        id: find_tar_gz
         run: |
-          cat zip_gz_files.txt
+          find . -type f -name "*.tar.gz" -exec echo {} + > tar_gz_files.txt
+        continue-on-error: true
+
+      - name: Read TAR.GZ File List
+        id: read_tar_gz_list
+        run: |
+          cat tar_gz_files.txt
         continue-on-error: true
 
       - name: Create Release
@@ -47,6 +53,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./tpu-mlir/tpu-mlir_v1.3.beta.0-20230817.tar.gz  # 使用查找的文件列表
-          asset_name: zip_gz_files.zip  # 上传后的文件名
-          asset_content_type: application/zip  # 文件类
+          asset_path: ${{ steps.read_tar_gz_list.outputs.stdout }}  # 使用查找的文件列表
+          asset_name: tar_gz_files.zip  # 上传后的文件名
+          asset_content_type: application/zip  # 文件类型
