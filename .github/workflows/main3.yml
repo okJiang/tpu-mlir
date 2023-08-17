@@ -40,8 +40,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
         with:
-          tag_name:  FILE_PATH
-          release_name: FILE_PATH
+          tag_name:  "$FILE_PATH"
+          release_name: "$FILE_PATH"
           draft: false # 是否是草稿
           prerelease: false # 是否是预发布
     
