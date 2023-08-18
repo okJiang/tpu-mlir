@@ -5,9 +5,7 @@ name: Upload Release Assets
 
 on:
   push:
-    branches:
-    
-      - master  # 或者你的默认分支
+ 
 
 jobs:
   publish-release:
