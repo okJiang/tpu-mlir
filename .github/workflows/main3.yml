@@ -14,6 +14,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Run Docker container
+        run: |
+          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+          ./release.sh
+         
+          "
    
           
       - name: Find TAR.GZ Files
@@ -62,7 +68,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path:  ${{ steps.find_tar_gz.outputs.tar_gz_files }}
+          asset_path: ${{ steps.find_tar_gz.outputs.tar_gz_files  }}
           asset_name: tar_gz_files.zip  # 上传后的文件名
           asset_content_type: application/zip  # 文件类型
 
