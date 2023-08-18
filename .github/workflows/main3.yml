@@ -14,6 +14,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Run Docker container
+        run: |
+          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+          ./release.sh
+         
+          "
         
       - name: Get system time
         id: system-time
@@ -31,6 +37,7 @@ jobs:
           body: This is the release description.
           draft: false
           prerelease: false
+          
       - name: Find TAR.GZ Files
         id: find_tar_gz
         run: |
