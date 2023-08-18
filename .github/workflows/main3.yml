@@ -26,8 +26,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v11.0.0
-          release_name: Release v11.0.0
+          tag_name: V0.${{ github.run_id }}.dev
+          name: V0.${{ github.run_id }}.dev
           body: This is the release description.
           draft: false
           prerelease: false
