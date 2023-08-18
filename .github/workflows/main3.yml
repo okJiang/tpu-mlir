@@ -20,8 +20,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
     
-            tag_name: V0.${{ github.run_id }}.dev
-            name: V0.${{ github.run_id }}.dev
+            tag_name: V0.0.1
+            name: V0.0.1
             body: TODO New Release.
             draft: false  # 是否是草稿
             prerelease: false # 是否是预览版
