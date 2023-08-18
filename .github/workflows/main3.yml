@@ -11,25 +11,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Run Docker container
-        run: |
-          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
-          ./release.sh
-         
-          "
+  
 
-      - name: Create Release # 创建Release，可以在仓库看到一个个版本
+      - name: Create Release
         id: create_release
-        uses: actions/create-release@master
+        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN}} # 之前GitHub添加的Token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+    
             tag_name: V0.${{ github.run_id }}.dev
             name: V0.${{ github.run_id }}.dev
             body: TODO New Release.
             draft: false  # 是否是草稿
             prerelease: false # 是否是预览版
-          
       - name: Find TAR.GZ Files
         id: find_tar_gz
         run: |
@@ -45,7 +40,7 @@ jobs:
         id: upload_release_assets
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path:  ${{ steps.find_tar_gz.outputs.tar_gz_files }}
