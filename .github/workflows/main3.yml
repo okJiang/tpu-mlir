@@ -20,12 +20,17 @@ jobs:
           ./release.sh
          
           "
+          
+      - name: Find TAR.GZ Files
+        id: find_tar_gz
+        run: |
+          tar_gz_files=$(find . -type f -name "*.tar.gz")
+          echo "::set-output name=tar_gz_files::$tar_gz_files"
+        continue-on-error: true
         
-      - name: Get system time
-        id: system-time
-        run: echo "::set-output name=ss::$(date +'%Y-%m-%d %H:%M:%S')"
-    
-
+     
+ 
+  
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -38,15 +43,7 @@ jobs:
           draft: false
           prerelease: false
           
-      - name: Find TAR.GZ Files
-        id: find_tar_gz
-        run: |
-          tar_gz_files=$(find . -type f -name "*.tar.gz")
-          echo "::set-output name=tar_gz_files::$tar_gz_files"
-        continue-on-error: true
-
-
-  
+   
 
         
       - name: Upload Release Assets
