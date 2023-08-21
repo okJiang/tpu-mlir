@@ -4,9 +4,7 @@ name: Build and release
 
 on:
   push:
-    branches:
-            - main
-
+   
 jobs:
   build:
     runs-on: ubuntu-latest
