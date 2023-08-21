@@ -2,8 +2,7 @@ name: Build and release
 
 on:
   push:
-   tags:
-       - "*"
+  
 
 jobs:
   build:
@@ -12,6 +11,16 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+
+    - name: Get latest tag
+      id: get_latest_tag
+      run: |
+            latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+            echo "::set-output name=tag::$latest_tag"
+
+    - name: Checkout to latest tag
+      run: |
+            git checkout ${{ steps.get_latest_tag.outputs.tag }}
 
     - name: Pull Docker image
       run: docker pull sophgo/tpuc_dev:latest
