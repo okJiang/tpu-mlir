@@ -21,21 +21,19 @@ jobs:
       run: |
         # Get the latest tag
         GIT_SHORT_HASH=$(git describe --tags --always)
-        # Strip leading and trailing whitespace
-   
-        GIT_SHORT_HASH=$(echo $GIT_SHORT_HASH | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-        # 删除 "_" 和 "-" 之间的内容
-        GIT_SHORT_HASH=$(echo $GIT_SHORT_HASH | sed -E 's/_.*-/-/')
-        # 打印最终版本
-        echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}" >> $GITHUB_ENV
-
-    - name: Pull Docker image
-      run: docker pull sophgo/tpuc_dev:latest
+        # Use regex to extract the version
+        first_part=$(echo "$GIT_SHORT_HASH" | cut -d '-' -f1)
+        # Print the final version
+        echo "GIT_SHORT_HASH=${first_part}" >> $GITHUB_ENV
+        echo 'BUILD_TIME=$(date "+%Y%m%d")' >> $GITHUB_ENV
+    # - name: Pull Docker image
+    #   run: docker pull sophgo/tpuc_dev:latest
 
     - name: Run Docker container
       run: |
         git describe --tags --always
         docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+          find . -type f -name "*.tar.gz" -exec rm -f {} \;
           ./release.sh
         "
     - name: Find and copy .tar.gz file
@@ -55,7 +53,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       run: >-
-        gh release create "tpu-mlir_${{ env.GIT_SHORT_HASH }}.tar.gz"
-        "./${{ env.FILE_PATH }}"
+        gh release create "v1.3" "tpu-mlir_v1.3-$(date "+%Y%m%d").tar.gz" --generate-notes --title "Release tpu-mlir_v1.3-$(date "+%Y%m%d").tar.gz"
+
         --generate-notes
-        --title "Release tpu-mlir_${{ env.GIT_SHORT_HASH }}.tar.gz"
+        --title "Release tpu-mlir_${{ env.GIT_SHORT_HASH }}-${{ env.BUILD_TIME }}.tar.gz"
