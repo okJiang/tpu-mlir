@@ -1,59 +1,43 @@
-name: Build and release
+name: Upload Release Assets
 
 on:
   push:
-    branches:
-      - '*'
-
-  workflow_dispatch:
+    # 配置适当的分支触发工作流
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Get Git Tag
-      id: get_git_tag
-      run: |
-        # Get the latest tag
-        GIT_SHORT_HASH=$(git describe --tags --always)
-        # Use regex to extract the version
-        first_part=$(echo "$GIT_SHORT_HASH" | cut -d '-' -f1)
-        # Print the final version
-        echo "GIT_SHORT_HASH=${first_part}" >> $GITHUB_ENV
-        echo 'BUILD_TIME=$(date "+%Y%m%d")' >> $GITHUB_ENV
-    # - name: Pull Docker image
-    #   run: docker pull sophgo/tpuc_dev:latest
+      - name: Pull Docker image
+        run: docker pull sophgo/tpuc_dev:latest
 
-    - name: Run Docker container
-      run: |
-        git describe --tags --always
-        docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
-          find . -type f -name "*.tar.gz" -exec rm -f {} \;
+      - name: Run Docker container
+        run: |
+          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
           ./release.sh
-        "
-    - name: Find and copy .tar.gz file
-      run: |
-        docker start myname1234
-        FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
-        if [ -n "$FILE_PATH" ]; then
-          docker cp myname1234:"$FILE_PATH" ./
-          ls -al
-          pwd
-        else
-          echo "File not found in container"
-        fi
-        FILE_PATH=${FILE_PATH#/workspace/}
-        echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
-    - name: Release
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-      run: >-
-        gh release create "${{ env.GIT_SHORT_HASH }}"
-        "${{ env.FILE_PATH }}"
-        --generate-notes
-        --title "Release tpu-mlir_${{ env.GIT_SHORT_HASH }}-${{ env.BUILD_TIME }}.tar.gz"
+         
+          "
+      - name: Find and copy .tar.gz file
+        run: |
+          docker start myname1234
+          FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
+          if [ -n "$FILE_PATH" ]; then
+            docker cp myname1234:"$FILE_PATH" $GITHUB_WORKSPACE/
+            
+          else
+            echo "File not found in container"
+          fi
+      - name: Create Release # 创建Release，可以在仓库看到一个个版本
+        id: create_release
+        uses: actions/create-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
+        with:
+          tag_name:  v1.3.beta.1
+          release_name: tpu-mlir_v1.3.beta.1-20230822.tar.gz
+          draft: false # 是否是草稿
+          prerelease: false # 是否是预发布
