@@ -2,8 +2,8 @@ name: Cache Docker Container Build
 
 on:
   push:
-         tags：
-            - "c*"
+     branches:
+            - "main"
 
   
 
