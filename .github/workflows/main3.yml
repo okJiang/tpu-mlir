@@ -63,16 +63,7 @@ jobs:
         else
           echo "File not found in container"
         fi
-        FILE_PATH=${FILE_PATH#/workspace/}
-        #!/bin/bash
-        ORIGINAL_FILENAME="FILE_PATH"
-        PATTERN="[^-]*-[^-]*-"
-        # 使用 sed 去掉第二个和第四个 "-" 之间的字符串
-        FILE_PATH=$(echo $ORIGINAL_FILENAME | sed -E "s/${PATTERN}//")
-        echo "Stripped Filename: $FILE_PATH"
-        ls -al
-        pwd
-        
+        FILE_PATH=${FILE_PATH#/workspace/}  
         echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
     - name: Release
       env:
