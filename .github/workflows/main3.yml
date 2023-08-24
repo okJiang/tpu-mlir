@@ -2,7 +2,7 @@ name: Build and release
 
 on:
   push:
-    branches:
+    tags:
       - '*'
 
 
@@ -17,11 +17,15 @@ jobs:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
+        
+    - name: Get Tag Info
+      id: get_tag_info
+      run: echo "TAG=${{ github.ref }}"
 
     - name: Get Git Tag
       id: get_git_tag
       run: |
-        TAG=$(git describe --tags --abbrev=0)
+        TAG=${{ steps.get_tag_info.outputs.TAG }}
         echo "TAG=${TAG}" >> $GITHUB_ENV
         # Get the latest tag
         GIT_SHORT_HASH=$(git describe --tags --always)
