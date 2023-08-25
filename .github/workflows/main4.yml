@@ -16,7 +16,7 @@ jobs:
       - name: Get Releases
         id: get_releases
         run: |
-          releases=$(curl -s "https://api.github.com/repos/OWNER/REPO/releases")
+          releases=$(curl -s "https://github.com/Xieminghe/tpu-mlir/releases")
           echo "::set-output name=releases::$releases"
           
       - name: Check Attachments
