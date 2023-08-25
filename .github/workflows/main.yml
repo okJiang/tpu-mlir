@@ -16,45 +16,37 @@ jobs:
           fetch-depth: 0
 
 
-      - name: Create Release # 创建Release，可以在仓库看到一个版本
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }} # 之前GitHub添加的Token
-        with:
-          tag_name: ${{ github.ref }} # (tag)标签名称
-          release_name: Release ${{ github.ref }}
-          draft: false # 是否是草稿
-          prerelease: false # 是否是预发布
-
-
       - name: Get Git Tag
         id: get_git_tag
         run: |
+            TAG=$(git describe --tags --abbrev=0)
+            echo "TAG=${TAG}" >> $GITHUB_ENV
 
-          # Get the latest tag
-          GIT_SHORT_HASH=$(git describe --tags --always)
-          echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
-          # Strip leading and trailing whitespace
-          GIT_SHORT_HASH=$(echo $GIT_SHORT_HASH | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-          echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
-          # Find the position of the first hyphen (-)
-          iLength=$(expr index "$GIT_SHORT_HASH" -)
-          echo "iLength=${iLength}"
-          # Extract the MAIN_VERSION and PATCH_VERSION
-          MAIN_VERSION=${GIT_SHORT_HASH:0:iLength-1}
-          PATCH_VERSION=${GIT_SHORT_HASH:iLength}
-          echo "MAIN_VERSION=${MAIN_VERSION}"
-          echo "PATCH_VERSION=${PATCH_VERSION}"
-           # Find the position of the first hyphen (-)
-          iLength=$(expr index "$PATCH_VERSION" -)
-          echo "iLength=${iLength}"
-          PATCH_VERSION=${PATCH_VERSION:0:iLength-1}
-          echo "PATCH_VERSION=${PATCH_VERSION}"
-           # Combine MAIN_VERSION and PATCH_VERSION
-          GIT_SHORT_HASH="${MAIN_VERSION}.${PATCH_VERSION}"
-          echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}" >> $GITHUB_ENV
-          echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
+
+
+            # Get the latest tag
+            GIT_SHORT_HASH=$(git describe --tags --always)
+            echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
+            # Strip leading and trailing whitespace
+            GIT_SHORT_HASH=$(echo $GIT_SHORT_HASH | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+            echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
+            # Find the position of the first hyphen (-)
+            iLength=$(expr index "$GIT_SHORT_HASH" -)
+            echo "iLength=${iLength}"
+            # Extract the MAIN_VERSION and PATCH_VERSION
+            MAIN_VERSION=${GIT_SHORT_HASH:0:iLength-1}
+            PATCH_VERSION=${GIT_SHORT_HASH:iLength}
+            echo "MAIN_VERSION=${MAIN_VERSION}"
+            echo "PATCH_VERSION=${PATCH_VERSION}"
+            # Find the position of the first hyphen (-)
+            iLength=$(expr index "$PATCH_VERSION" -)
+            echo "iLength=${iLength}"
+            PATCH_VERSION=${PATCH_VERSION:0:iLength-1}
+            echo "PATCH_VERSION=${PATCH_VERSION}"
+            # Combine MAIN_VERSION and PATCH_VERSION
+            GIT_SHORT_HASH="${MAIN_VERSION}.${PATCH_VERSION}"
+            echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}" >> $GITHUB_ENV
+            echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
 
 
       - name: Run Docker container
