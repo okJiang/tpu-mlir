@@ -1,0 +1,77 @@
+name: Check Unreleased Tags and Checkout Code
+
+on:
+  push:
+    branches:
+      - master  # 你的默认分支
+
+jobs:
+  check_and_checkout:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: List Tags
+        run: git tag --list
+        id: tag_list
+
+      - name: Set Unreleased Tags
+        id: set_unreleased_tags
+        run: |
+          UNRELEASED_TAGS=$(git tag | grep -v -f /dev/stdin <(echo "${{ steps.tag_list.outputs.stdout }}"))
+          echo "::set-output name=unreleased_tags::$UNRELEASED_TAGS"
+
+      - name: Check Unreleased Tags
+        run: |
+          UNRELEASED_TAGS="${{ steps.set_unreleased_tags.outputs.unreleased_tags }}"
+          if [ -n "$UNRELEASED_TAGS" ]; then
+            echo "Unreleased tags found: $UNRELEASED_TAGS"
+            # 在这里可以进一步处理未发布的标签，比如发布它们等等
+
+            # Checkout 未发布的标签
+            for tag in $UNRELEASED_TAGS; do
+              git checkout $tag
+              # 这里可以执行你的操作，比如编译、测试等
+
+              docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+              # find . -type f -name "*.tar.gz" -exec rm -f {} \;
+              ./release.sh
+              "
+              docker stop myname1234
+              docker start myname1234
+              FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
+
+                if [ -n "$FILE_PATH" ]; then
+                  docker cp myname1234:"$FILE_PATH" ./
+                  ls -al
+                  pwd
+                else
+                  echo "File not found in container"
+                fi
+
+              FILE_PATH=${FILE_PATH#/workspace/}
+              echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+
+              - name: Release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+                  run: >-
+                    gh release create "${{ env.TAG }}"
+                    "./${{ env.FILE_PATH }}"
+                    --generate-notes
+                    --title "Release tpu-mlir_${{ env.GIT_SHORT_HASH }}-${{ env.BUILD_TIME }}.tar.gz"
+
+
+            fi
+            done
+
+          else
+              echo "No unreleased tags found."
+
+
+
+
+
+
