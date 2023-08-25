@@ -61,20 +61,20 @@ jobs:
                   echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}" >> $GITHUB_ENV
                   echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
 
-                docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
-                # find . -type f -name "*.tar.gz" -exec rm -f {} \;
-                ./release.sh
-                "
-                docker stop myname1234
-                docker start myname1234
-                FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
-
-                  if [ -n "$FILE_PATH" ]; then
-                    docker cp myname1234:"$FILE_PATH" ./
-                    ls -al
-                    pwd
-                  else
-                    echo "File not found in container"
+                  docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+                  # find . -type f -name "*.tar.gz" -exec rm -f {} \;
+                  ./release.sh
+                  "
+                  docker stop myname1234
+                  docker start myname1234
+                  FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
+  
+                    if [ -n "$FILE_PATH" ]; then
+                      docker cp myname1234:"$FILE_PATH" ./
+                      ls -al
+                      pwd
+                    else
+                      echo "File not found in container"
 
 
                 FILE_PATH=${FILE_PATH#/workspace/}
@@ -91,10 +91,6 @@ jobs:
 
 
 
-            else
-              echo "No unreleased tags found."
-            fi
-          done
 
 
 
