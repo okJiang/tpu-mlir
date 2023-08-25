@@ -1,53 +1,28 @@
-name: Cache Docker Container Build
+name: Caching Primes
 
 on:
-  push:
+   push:
      branches:
-            - "main"
-
-  
-
+         - "master" #根据项目需求设置触发的分支
 jobs:
   build:
     runs-on: ubuntu-latest
 
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
+    - name: Pull Docker images
+      run: |
+            docker pull sophgo/tpuc_dev:latest
+    - name: Run Docker Container and YOLOv5 Test
+      run: |
+          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
 
-      - name: Restore cache
-        uses: actions/cache@v2
-        with:
-          path: /home/runner/work/tpu-mlir/tpu-mlir/ccache
-          key: ${{ runner.os }}-docker-${{ hashFiles('/home/runner/work/tpu-mlir/tpu-mlir/ccache') }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
-    
-   
-      - name: Run Docker Container and YOLOv5 Test
-        run: |
-         
-          
-          docker run --privileged --name myname1234 -v /home/runner/work/tpu-mlir/tpu-mlir/ccache sophgo/tpuc_dev:v2.2   
-          docker attach myname1234 -c '
-                      #   cp -r $GITHUB_WORKSPACE/tpu-mlir/~/.cache/ccache /root/.cache/ccache
-         
           source ./envsetup.sh
           ./build.sh
-          '
-         
-         
-      - name: copy
-        run: docker cp myname1234:/root/.cache/ccache /home/runner/work/tpu-mlir/tpu-mlir/
-      
-      - name: Save cache
-        uses: actions/cache@v2
-        with:
-          path: /home/runner/work/tpu-mlir/tpu-mlir/ccache
-          key: ${{ runner.os }}-docker-${{ hashFiles('/home/runner/work/tpu-mlir/tpu-mlir/ccache') }}
 
- 
-    
-         
-    
+           cd regression
+           ./run.sh
+
+           '
