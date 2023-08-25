@@ -1,4 +1,4 @@
-name: Create Release Version
+name: Reuse Docker Image
 
 on:
   push:
@@ -10,43 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+           fetch-depth: 0
+
 
 
       - name: Get Git Tag
-        id: get_git_tag
+        id: get_git_tag0
         run: |
             TAG=$(git describe --tags --abbrev=0)
             echo "TAG=${TAG}" >> $GITHUB_ENV
 
+      - name: Get Git Tag
+        id: get_git_tag1
+        run: |
 
-
-            # Get the latest tag
-            GIT_SHORT_HASH=$(git describe --tags --always)
-            echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
-            # Strip leading and trailing whitespace
-            GIT_SHORT_HASH=$(echo $GIT_SHORT_HASH | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-            echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
-            # Find the position of the first hyphen (-)
-            iLength=$(expr index "$GIT_SHORT_HASH" -)
-            echo "iLength=${iLength}"
-            # Extract the MAIN_VERSION and PATCH_VERSION
-            MAIN_VERSION=${GIT_SHORT_HASH:0:iLength-1}
-            PATCH_VERSION=${GIT_SHORT_HASH:iLength}
-            echo "MAIN_VERSION=${MAIN_VERSION}"
-            echo "PATCH_VERSION=${PATCH_VERSION}"
-            # Find the position of the first hyphen (-)
-            iLength=$(expr index "$PATCH_VERSION" -)
-            echo "iLength=${iLength}"
-            PATCH_VERSION=${PATCH_VERSION:0:iLength-1}
-            echo "PATCH_VERSION=${PATCH_VERSION}"
-            # Combine MAIN_VERSION and PATCH_VERSION
-            GIT_SHORT_HASH="${MAIN_VERSION}.${PATCH_VERSION}"
-            echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}" >> $GITHUB_ENV
-            echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
+              echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
 
 
       - name: Run Docker container
@@ -79,4 +59,8 @@ jobs:
           gh release create "${{ env.TAG }}"
           "./${{ env.FILE_PATH }}"
           --generate-notes
-          --title "Release tpu-mlir_${{ env.GIT_SHORT_HASH }}-${{ env.BUILD_TIME }}.tar.gz"
+          --title "Release tpu-mlir_${{ env.TAG }}-${{ env.BUILD_TIME }}.tar.gz"
+
+
+
+
