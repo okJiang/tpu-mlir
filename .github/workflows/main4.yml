@@ -13,8 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install jq
-        uses: stedolan/jq@v1
 
       - name: Get Releases
         id: get_releases
