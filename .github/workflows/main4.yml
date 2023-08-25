@@ -3,7 +3,7 @@ name: Check Attachments in Releases
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   check_attachments:
