@@ -1,4 +1,4 @@
-name: Check Releases Without .tar.gz Attachments
+name: Check Releases with Few Attachments
 
 on:
   push:
@@ -31,14 +31,15 @@ jobs:
             
             tag_name=$(_jq '.tag_name')
             assets=$(_jq '.assets')
+            assets_count=$(echo $assets | jq '. | length')
             
-            if [ -z "$(echo $assets | jq '.[] | select(.name | endswith(".tar.gz") | not)')" ]; then
-              echo "Release $(_jq '.name') has no .tar.gz attachments."
+            if [ "$assets_count" -lt 3 ]; then
+              echo "Release $(_jq '.name') has less than 3 attachments."
               echo "Tag: $tag_name"
               no_matching_releases="false"
             fi
           done
           
           if [ "$no_matching_releases" = "true" ]; then
-            echo "No releases without .tar.gz attachments found."
+            echo "No releases with less than 3 attachments found."
           fi
