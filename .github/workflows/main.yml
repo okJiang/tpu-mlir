@@ -1,4 +1,4 @@
-name: Reuse Docker Image
+name: Create Release Version
 
 on:
   push:
@@ -29,8 +29,6 @@ jobs:
       - name: Get Git Tag
         id: get_git_tag
         run: |
-          #  TAG=$(git describe --tags --abbrev=0)
-          #  echo "TAG=${TAG}" >> $GITHUB_ENV
 
           # Get the latest tag
           GIT_SHORT_HASH=$(git describe --tags --always)
