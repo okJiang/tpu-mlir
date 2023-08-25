@@ -1,4 +1,4 @@
-name: Check Attachments in Releases
+name: Check Releases Without .tar.gz Attachments
 
 on:
   push:
@@ -6,9 +6,8 @@ on:
       - master
 
 jobs:
-  check_attachments:
+  check_releases:
     runs-on: ubuntu-latest
-    
     
     steps:
       - name: Checkout code
@@ -20,25 +19,26 @@ jobs:
           releases=$(curl -s "https://github.com/Xieminghe/tpu-mlir/releases")
           echo "::set-output name=releases::$releases"
           
-      - name: Check Attachments
+      - name: Check Releases
         run: |
           releases="${{ steps.get_releases.outputs.releases }}"
-          no_attachments_found="true"
+          no_matching_releases="true"
           
           for release in $(echo "$releases" | jq -r '.[] | @base64'); do
             _jq() {
               echo ${release} | base64 --decode | jq -r ${1}
             }
             
-            assets_count=$(_jq '.assets | length')
+            tag_name=$(_jq '.tag_name')
+            assets=$(_jq '.assets')
             
-            if [ "$assets_count" -eq 0 ]; then
-              echo "Release $(_jq '.name') has no attachments."
-              echo "Tag: $(_jq '.tag_name')"
-              no_attachments_found="false"
+            if [ -z "$(echo $assets | jq '.[] | select(.name | endswith(".tar.gz") | not)')" ]; then
+              echo "Release $(_jq '.name') has no .tar.gz attachments."
+              echo "Tag: $tag_name"
+              no_matching_releases="false"
             fi
           done
           
-          if [ "$no_attachments_found" = "true" ]; then
-            echo "No releases without attachments found."
+          if [ "$no_matching_releases" = "true" ]; then
+            echo "No releases without .tar.gz attachments found."
           fi
