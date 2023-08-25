@@ -14,16 +14,7 @@ jobs:
         uses: actions/checkout@v2
 
 
- # 第二步：打包构建
-      - name: Build
-        uses: actions/setup-node@master
-      - run: npm init -y
-      - run: npm run build --if-present # 打包
-      - run: tar -zcvf release.tgz  package.json 
-      # 把.nuxt、nuxt.config.js等文件，打包压缩为release.tgz
-
-    # 第三步：发布 Release
-      - name: Create Release # 创建Release，可以在仓库看到一个个版本
+      - name: Create Release # 创建Release，可以在仓库看到一个版本
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -35,99 +26,64 @@ jobs:
           prerelease: false # 是否是预发布
 
 
-      - name: Set up Docker
+      - name: Get Git Tag
+        id: get_git_tag
         run: |
-          docker pull sophgo/tpuc_dev:latest
+          TAG=$(git describe --tags --abbrev=0)
+          echo "TAG=${TAG}" >> $GITHUB_ENV
+          # Get the latest tag
+          GIT_SHORT_HASH=$(git describe --tags --always)
+          echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
+          # Strip leading and trailing whitespace
+          GIT_SHORT_HASH=$(echo $GIT_SHORT_HASH | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
+          # Find the position of the first hyphen (-)
+          iLength=$(expr index "$GIT_SHORT_HASH" -)
+          echo "iLength=${iLength}"
+          # Extract the MAIN_VERSION and PATCH_VERSION
+          MAIN_VERSION=${GIT_SHORT_HASH:0:iLength-1}
+          PATCH_VERSION=${GIT_SHORT_HASH:iLength}
+          echo "MAIN_VERSION=${MAIN_VERSION}"
+          echo "PATCH_VERSION=${PATCH_VERSION}"
+           # Find the position of the first hyphen (-)
+          iLength=$(expr index "$PATCH_VERSION" -)
+          echo "iLength=${iLength}"
+          PATCH_VERSION=${PATCH_VERSION:0:iLength-1}
+          echo "PATCH_VERSION=${PATCH_VERSION}"
+           # Combine MAIN_VERSION and PATCH_VERSION
+          GIT_SHORT_HASH="${MAIN_VERSION}.${PATCH_VERSION}"
+          echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}" >> $GITHUB_ENV
+          echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
 
 
-      - name: Run Docker Container
+      - name: Run Docker container
         run: |
-          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
+          git describe --tags --always
+          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+          # find . -type f -name "*.tar.gz" -exec rm -f {} \;
+          ./release.sh
 
-      
-          cd tpu-mlir
-          source ./envsetup.sh
-          ./build.sh
-
-
-          mkdir model_yolov5s && cd model_yolov5s
-          cp ${REGRESSION_PATH}/model/yolov5s.onnx .
-          cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
-          cp -rf ${REGRESSION_PATH}/image .
-          mkdir workspace && cd workspace
-          
-          ########### Model to MLIR ###############
-          
-          model_transform.py \
-             --model_name yolov5s \
-             --model_def ../yolov5s.onnx \
-             --input_shapes [[1,3,640,640]] \
-             --mean 0.0,0.0,0.0 \
-             --scale 0.0039216,0.0039216,0.0039216 \
-             --keep_aspect_ratio \
-             --pixel_format rgb \
-             --output_names 350,498,646 \
-             --test_input ../image/dog.jpg \
-             --test_result yolov5s_top_outputs.npz \
-             --mlir yolov5s.mlir
-
-          ############ MLIR to F16 bmodel ##########
-          
-          model_deploy.py \
-             --mlir yolov5s.mlir \
-             --quantize F16 \
-             --chip bm1684x \
-             --test_input yolov5s_in_f32.npz \
-             --test_reference yolov5s_top_outputs.npz \
-             --model yolov5s_1684x_f16.bmodel
-             
-           ############ MLIR to int8 bmodel ##########
-           
-          run_calibration.py yolov5s.mlir \
-              --dataset ../COCO2017 \
-              --input_num 100 \
-              -o yolov5s_cali_table
-
-          model_deploy.py \
-              --mlir yolov5s.mlir \
-              --quantize INT8 \
-              --calibration_table yolov5s_cali_table \
-              --chip bm1684x \
-              --test_input yolov5s_in_f32.npz \
-              --test_reference yolov5s_top_outputs.npz \
-              --tolerance 0.85,0.45 \
-              --model yolov5s_1684x_int8.bmodel
-              
-           ############ Results Comparison ##########
-           
-           detect_yolov5.py \
-              --input ../image/dog.jpg \
-              --model ../yolov5s.onnx \
-              --output dog_origin.jpg
-        
-           detect_yolov5.py \
-              --input ../image/dog.jpg \
-              --model yolov5s_1684x_f16.bmodel \
-              --output dog_f16.jpg
-
-          detect_yolov5.py \
-              --input ../image/dog.jpg \
-              --model yolov5s_1684x_int8.bmodel \
-              --output dog_int8.jpg
-
-            ####### Model Inference Tool 'model_runner.py'#####
-           model_runner.py \
-              --input resnet18_in_f32.npz \
-              --model resnet18_1684x_f32.bmodel \
-              --output resnet18_output.npz
-          '
+          "
+      - name: Find and copy .tar.gz file
+        run: |
+          docker start myname1234
+          FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
+          if [ -n "$FILE_PATH" ]; then
+            docker cp myname1234:"$FILE_PATH" ./
+            ls -al
+            pwd
+          else
+            echo "File not found in container"
+          fi
+          FILE_PATH=${FILE_PATH#/workspace/}
+          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
 
 
-          
-
-
-          
-
-
-
-
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: >-
+          gh release create "${{ env.TAG }}"
+          "./${{ env.FILE_PATH }}"
+          --generate-notes
+          --title "Release tpu-mlir_${{ env.GIT_SHORT_HASH }}-${{ env.BUILD_TIME }}.tar.gz"
