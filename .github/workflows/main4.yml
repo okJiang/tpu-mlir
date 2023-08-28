@@ -5,6 +5,7 @@ on:
      branches:
          - "master"
 
+
 jobs:
   check-assets:
     runs-on: ubuntu-latest
@@ -17,9 +18,11 @@ jobs:
         run: |
           release_id=$(jq -r '.release.id' $GITHUB_EVENT_PATH)
           assets_count=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/$release_id/assets" | jq length)
+          release_tag=$(jq -r '.release.tag_name' $GITHUB_EVENT_PATH)
           
           if [[ $assets_count -gt 0 ]]; then
-            echo "Release contains assets."
+            echo "Release $release_tag contains assets."
           else
-            echo "Release does not contain assets."
+            echo "Release $release_tag does not contain assets."
           fi
+
