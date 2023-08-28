@@ -20,7 +20,7 @@ jobs:
           repo_owner="Xieminghe"
           repo_name="tpu-mlir"
           release_id=$(jq -r '.release.id' $GITHUB_EVENT_PATH)
-          assets_count=$(curl -s -H "Authorization: Bearer ${{ secrets.RELEASE_TOKEN }}" "https://api.github.com/repos/$repo_owner/$repo_name/releases/$release_id/Assets" | jq length)
+          assets_count=$(curl -s -H "Authorization: Bearer ${{ secrets.RELEASE_TOKEN }}" "https:https://github.com/Xieminghe/tpu-mlir/releases/$release_id/Assets" | jq length)
           release_tag=$(jq -r '.release.tag_name' $GITHUB_EVENT_PATH)
           
           if [[ $assets_count -gt 0 ]]; then
