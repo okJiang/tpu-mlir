@@ -1,45 +1,25 @@
-name: Check Releases with Few Attachments
+name: Check Release Assets
 
 on:
-  push:
-    branches:
-      - master
+  release:
+    types:
+      - created
 
 jobs:
-  check_releases:
+  check-assets:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
-        
-      - name: Get Releases
-        id: get_releases
+
+      - name: Check Release Assets
         run: |
-          releases=$(curl -s "https://github.com/Xieminghe/tpu-mlir/releases")
-          echo "::set-output name=releases::$releases"
+          release_id=$(jq -r '.release.id' $GITHUB_EVENT_PATH)
+          assets_count=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/$release_id/assets" | jq length)
           
-      - name: Check Releases
-        run: |
-          releases="${{ steps.get_releases.outputs.releases }}"
-          no_matching_releases="true"
-          
-          for release in $(echo "$releases" | jq -r '.[] | @base64'); do
-            _jq() {
-              echo ${release} | base64 --decode | jq -r ${1}
-            }
-            
-            tag_name=$(_jq '.tag_name')
-            assets=$(_jq '.assets')
-            assets_count=$(echo $assets | jq '. | length')
-            
-            if [ "$assets_count" -lt 3 ]; then
-              echo "Release $(_jq '.name') has less than 3 attachments."
-              echo "Tag: $tag_name"
-              no_matching_releases="false"
-            fi
-          done
-          
-          if [ "$no_matching_releases" = "true" ]; then
-            echo "No releases with less than 3 attachments found."
+          if [[ $assets_count -gt 0 ]]; then
+            echo "Release contains assets."
+          else
+            echo "Release does not contain assets."
           fi
