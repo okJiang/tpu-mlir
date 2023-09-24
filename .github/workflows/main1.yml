@@ -1,26 +1,16 @@
-name: Regression test
-
-on:
-  push:
-   branches:
-       - "master" #根据项目需求设置触发的分支
+name: Update Pip and Build
 
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-
-
-name: Update Pip and Build
-
-
 on:
   push:
     branches:
       - master # 修改为您的默认分支
 
-- steps:
+    steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
@@ -63,12 +53,12 @@ on:
           python setup.py build
 
 
-    steps:
-    - uses: actions/checkout@v3
+      steps:
+      - uses: actions/checkout@v3
 
 
-    - name: Run Docker Container and YOLOv5 Test
-      run: |
+      - name: Run Docker Container and YOLOv5 Test
+        run: |
           docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
 
 
