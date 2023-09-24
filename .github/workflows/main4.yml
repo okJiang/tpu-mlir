@@ -1,0 +1,45 @@
+name: Check Release Assets
+
+on:
+  push:
+     branches:
+         - "master"
+
+
+
+jobs:
+  check-assets:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get Release Info
+        id: release
+        run: |
+          echo "::set-output name=tag_name::$(jq -r '.release.tag_name' $GITHUB_EVENT_PATH)"
+          echo "::set-output name=release_id::$(jq -r '.release.id' $GITHUB_EVENT_PATH)"
+
+      - name: Get Assets
+        id: assets
+        run: |
+          repo_owner="Xieminghe"
+          repo_name="tpu-mlir"
+          release_id=${{ steps.release.outputs.release_id }}
+          assets=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/$repo_owner/$repo_name/releases/$release_id/assets")
+          echo "::set-output name=assets::$(echo $assets | jq length)"
+
+      - name: Check Release Assets
+        run: |
+          repo_owner="Xieminghe"
+          repo_name="tpu-mlir"
+          all_releases=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/$repo_owner/$repo_name/releases")
+          release_tags=$(echo $all_releases | jq -r '.[].tag_name')
+          
+          for release_tag in $release_tags; do
+            release_id=$(echo $all_releases | jq -r --arg tag "$release_tag" '.[] | select(.tag_name == $tag) | .id')
+            assets=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/$repo_owner/$repo_name/releases/$release_id/assets")
+            assets_count=$(echo $assets | jq length)
+            echo "Release $release_tag contains $assets_count assets."
+          done
