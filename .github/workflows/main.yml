@@ -40,6 +40,7 @@ jobs:
         GIT_SHORT_HASH="${MAIN_VERSION}.${PATCH_VERSION}"
         echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}" >> $GITHUB_ENV
         echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
+
     - name: Run Docker container
       run: |
         git describe --tags --always
@@ -47,6 +48,7 @@ jobs:
           # find . -type f -name "*.tar.gz" -exec rm -f {} \;
           ./release.sh
         "
+
     - name: Find and copy .tar.gz file
       run: |
         docker start myname1234
@@ -60,6 +62,7 @@ jobs:
         fi
         FILE_PATH=${FILE_PATH#/workspace/}
         echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+
     - name: Release
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

@@ -1,0 +1,104 @@
+name: Check Attachments in Releases
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check_attachments:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+
+
+      - name: Get Releases
+        id: get_releases
+        run: |
+          releases=$(curl -s "https://github.com/Xieminghe/tpu-mlir/releases/")
+          echo "::set-output name=releases::$releases"
+
+      - name: Check Attachments
+        run: |
+          releases="${{ steps.get_releases.outputs.releases }}"
+
+          for release in $(echo "$releases" | jq -r '.[] | @base64'); do
+            _jq() {
+              echo ${release} | base64 --decode | jq -r ${1}
+            }
+
+            assets=$(_jq '.assets')
+
+            if [ "$assets" != "[]" ]; then
+              echo "Release $(_jq '.name') has attachments."
+              # 在这里执行进一步的操作，比如下载附件等
+
+
+
+
+              run: |
+                  TAG=$(git describe --tags --abbrev=0)
+                  echo "TAG=${TAG}" >> $GITHUB_ENV
+                  # Get the latest tag
+                  GIT_SHORT_HASH=$(git describe --tags --always)
+                  echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
+                  # Strip leading and trailing whitespace
+                  GIT_SHORT_HASH=$(echo $GIT_SHORT_HASH | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+                  echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}"
+                  # Find the position of the first hyphen (-)
+                  iLength=$(expr index "$GIT_SHORT_HASH" -)
+                  echo "iLength=${iLength}"
+                  # Extract the MAIN_VERSION and PATCH_VERSION
+                  MAIN_VERSION=${GIT_SHORT_HASH:0:iLength-1}
+                  PATCH_VERSION=${GIT_SHORT_HASH:iLength}
+                  echo "MAIN_VERSION=${MAIN_VERSION}"
+                  echo "PATCH_VERSION=${PATCH_VERSION}"
+
+                  # Combine MAIN_VERSION and PATCH_VERSION
+                  GIT_SHORT_HASH="${MAIN_VERSION}.${PATCH_VERSION}"
+                  echo "GIT_SHORT_HASH=${GIT_SHORT_HASH}" >> $GITHUB_ENV
+                  echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
+
+                docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+                # find . -type f -name "*.tar.gz" -exec rm -f {} \;
+                ./release.sh
+                "
+                docker stop myname1234
+                docker start myname1234
+                FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
+
+                  if [ -n "$FILE_PATH" ]; then
+                    docker cp myname1234:"$FILE_PATH" ./
+                    ls -al
+                    pwd
+                  else
+                    echo "File not found in container"
+
+
+                FILE_PATH=${FILE_PATH#/workspace/}
+                echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+
+
+                env:
+                    GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+                    run: >-
+                      gh release create "${{ env.TAG }}"
+                      "./${{ env.FILE_PATH }}"
+                      --generate-notes
+                      --title "Release tpu-mlir_${{ env.GIT_SHORT_HASH }}-${{ env.BUILD_TIME }}.tar.gz"
+
+
+
+            else
+              echo "No unreleased tags found."
+            fi
+          done
+
+
+
+
+
+
