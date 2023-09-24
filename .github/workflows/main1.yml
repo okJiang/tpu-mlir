@@ -12,32 +12,44 @@ jobs:
 
 
 
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Restore cached Primes
-      id: cache-primes-restore
-      uses: actions/cache/restore@v3
-      with:
-        path: |
-          path/to/dependencies
-          some/other/dependencies
-        key: ${{ runner.os }}-primes
-
-    - name: Save Primes
-      id: cache-primes-save
-      uses: actions/cache/save@v3
-      with:
-        path: |
-          path/to/dependencies
-          some/other/dependencies
-        key: ${{ steps.cache-primes-restore.outputs.cache-primary-key }}
+name: Update Pip and Build
 
 
+on:
+  push:
+    branches:
+      - master # 修改为您的默认分支
 
-    - name: Pull Docker images
-      run: |
-          docker pull sophgo/tpuc_dev:latest
+- steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # - name: Set up Python
+    #   uses: actions/setup-python@v2
+    #   with:
+    #     python-version: 3.10
+
+    # - name: Upgrade pip
+    #   run: |
+    #     python -m pip install --upgrade pip
+
+    # - name: Build and Publish
+    #   env:
+    #     TWINE_USERNAME: __token__
+    #     TWINE_PASSWORD: ${{ secrets.PYPITOKEN }}
+    #   run: |
+       
+    #     python setup.py sdist 
+        
+    #     pip install twine
+
+     
+         
+    #     twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+
+    #     twine upload dist/*  --verbose
+
+
 
 
     - name: Run Docker Container and YOLOv5 Test
@@ -48,70 +60,27 @@ jobs:
           cd tpu-mlir
           source ./envsetup.sh
           ./build.sh
+          python setup.py build
 
-          mkdir model_yolov5s && cd model_yolov5s
-          cp ${REGRESSION_PATH}/model/yolov5s.onnx .
-          cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
-          cp -rf ${REGRESSION_PATH}/image .
-          mkdir workspace && cd workspace
 
-          ########### Model to MLIR ###############
+    steps:
+    - uses: actions/checkout@v3
 
-          model_transform.py \
-             --model_name yolov5s \
-             --model_def ../yolov5s.onnx \
-             --input_shapes [[1,3,640,640]] \
-             --mean 0.0,0.0,0.0 \
-             --scale 0.0039216,0.0039216,0.0039216 \
-             --keep_aspect_ratio \
-             --pixel_format rgb \
-             --output_names 350,498,646 \
-             --test_input ../image/dog.jpg \
-             --test_result yolov5s_top_outputs.npz \
-             --mlir yolov5s.mlir
 
-           model_deploy.py \
-             --mlir yolov5s.mlir \
-             --quantize F16 \
-             --chip bm1684x \
-             --test_input yolov5s_in_f32.npz \
-             --test_reference yolov5s_top_outputs.npz \
-             --model yolov5s_1684x_f16.bmodel
+    - name: Run Docker Container and YOLOv5 Test
+      run: |
+          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
 
-           ############ MLIR to int8 bmodel ##########
 
-          run_calibration.py yolov5s.mlir \
-              --dataset ../COCO2017 \
-              --input_num 100 \
-              -o yolov5s_cali_table
+          cd tpu-mlir
+          source ./envsetup.sh
+          ./build.sh
+          python setup.py build
+          python setup.py bdist_wheel
 
-          model_deploy.py \
-              --mlir yolov5s.mlir \
-              --quantize INT8 \
-              --calibration_table yolov5s_cali_table \
-              --chip bm1684x \
-              --test_input yolov5s_in_f32.npz \
-              --test_reference yolov5s_top_outputs.npz \
-              --tolerance 0.85,0.45 \
-              --model yolov5s_1684x_int8.bmodel
-
-           ############ Results Comparison ##########
-
-           detect_yolov5.py \
-              --input ../image/dog.jpg \
-              --model ../yolov5s.onnx \
-              --output dog_origin.jpg
-
-           detect_yolov5.py \
-              --input ../image/dog.jpg \
-              --model yolov5s_1684x_f16.bmodel \
-              --output dog_f16.jpg
-
-           detect_yolov5.py \
-              --input ../image/dog.jpg \
-              --model yolov5s_1684x_int8.bmodel \
-              --output dog_int8.jpg
-
+       
+         
+    
              '
 
 
