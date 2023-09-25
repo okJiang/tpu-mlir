@@ -76,11 +76,13 @@ def search_files(dir_path):
 
 #list1 = list(search_files("/workspace/tpu-mlir/python"))
 #list2 = list(search_files("/workspace/tpu-mlir/regression"))
-list3 = list(search_files("/workspace/tpu-mlir/tpu_mlir/lib"))
+
 
 collect_caffe_dependence()
 release_packages_merge()
 setup(
+    list3 = list(search_files("/workspace/tpu-mlir/tpu_mlir/lib"))
+    
     name='tpu_mlir',
     version='1.3',
     author='sophgo',
