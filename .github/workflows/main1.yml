@@ -1,9 +1,9 @@
 name: Reuse Docker Image
 
 on:
-  push:
-    tags:
-        - 'v*.*.*'  # 以 'v' 开头的标签名称，如 'v1.0.0'
+   push:
+     branches:
+         - "master" #根据项目需求设置触发的分支
 
 jobs:
   reuse_image:
