@@ -88,6 +88,24 @@ def search_files(dir_path):
             print(complete_file_name)
     return result
 
+<<<<<<< HEAD
+=======
+#list1 = list(search_files("/workspace/tpu-mlir/python"))
+#list2 = list(search_files("/workspace/tpu-mlir/regression"))
+
+
+collect_caffe_dependence()
+release_packages_merge()
+setup(
+    list3 = list(search_files("/workspace/tpu-mlir/tpu_mlir/lib"))
+    
+    name='tpu_mlir',
+    version='1.3',
+    author='sophgo',
+    description='tpu-mlir release pip',
+    author_email='dev@sophgo.com',
+    license='Apache',
+>>>>>>> 6fbdc9992fd67b23b8cda870c964981c232cd8ec
 
 
 def tpu_mlir_setup():

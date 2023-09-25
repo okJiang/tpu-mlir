@@ -3,7 +3,7 @@ name: Caching Primes
 on:
    push:
      branches:
-         - "master" #根据项目需求设置触发的分支
+         - "main" #根据项目需求设置触发的分支
 jobs:
   build:
     runs-on: ubuntu-latest

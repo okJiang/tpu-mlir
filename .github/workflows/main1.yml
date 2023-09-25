@@ -1,118 +1,81 @@
-name: Regression test
+name: Reuse Docker Image
 
 on:
-  push:
-   branches:
-       - "master" #根据项目需求设置触发的分支
-
+   push:
+     branches:
+         - "master" #根据项目需求设置触发的分支
 
 jobs:
-  build:
+  reuse_image:
     runs-on: ubuntu-latest
 
-
-
     steps:
-    - uses: actions/checkout@v3
-
-    - name: Restore cached Primes
-      id: cache-primes-restore
-      uses: actions/cache/restore@v3
-      with:
-        path: |
-          path/to/dependencies
-          some/other/dependencies
-        key: ${{ runner.os }}-primes
-
-    - name: Save Primes
-      id: cache-primes-save
-      uses: actions/cache/save@v3
-      with:
-        path: |
-          path/to/dependencies
-          some/other/dependencies
-        key: ${{ steps.cache-primes-restore.outputs.cache-primary-key }}
+      - uses: actions/checkout@v3
+        with:
+           fetch-depth: 0
 
 
 
-    - name: Pull Docker images
-      run: |
-          docker pull sophgo/tpuc_dev:latest
+      - name: Get Git Tag
+        id: get_git_tag
+        run: |
+            TAG=$(git describe --tags --abbrev=0)
+            echo "TAG=${TAG}" >> $GITHUB_ENV
 
 
-    - name: Run Docker Container and YOLOv5 Test
-      run: |
-          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
+      - name: Get Date
+        id: get_date
+        run: |
+              echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
 
 
-          cd tpu-mlir
+      - name: Run Docker container
+        run: |
+          git describe --tags --always
+          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+          # find . -type f -name "*.tar.gz" -exec rm -f {} \;
+          #./release.sh
+
           source ./envsetup.sh
           ./build.sh
+          python setup.py build
+          python setup.py bdist_wheel
+          "
 
-          mkdir model_yolov5s && cd model_yolov5s
-          cp ${REGRESSION_PATH}/model/yolov5s.onnx .
-          cp -rf ${REGRESSION_PATH}/dataset/COCO2017 .
-          cp -rf ${REGRESSION_PATH}/image .
-          mkdir workspace && cd workspace
 
-          ########### Model to MLIR ###############
+      - name: Find and copy whl file
+        run: |
+          docker start myname1234
+          FILE_PATH=$(docker exec myname1234 find /workspace/tpu_mlir/dist/ -type f -name "*.whl" -print -quit)
+          if [ -n "$FILE_PATH" ]; then
+            docker cp myname1234:"$FILE_PATH" ./
+            ls -al
+            pwd
+          else
+            echo "File not found in container"
+          fi
+          FILE_PATH=${FILE_PATH#/workspace/}
+          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
 
-          model_transform.py \
-             --model_name yolov5s \
-             --model_def ../yolov5s.onnx \
-             --input_shapes [[1,3,640,640]] \
-             --mean 0.0,0.0,0.0 \
-             --scale 0.0039216,0.0039216,0.0039216 \
-             --keep_aspect_ratio \
-             --pixel_format rgb \
-             --output_names 350,498,646 \
-             --test_input ../image/dog.jpg \
-             --test_result yolov5s_top_outputs.npz \
-             --mlir yolov5s.mlir
 
-           model_deploy.py \
-             --mlir yolov5s.mlir \
-             --quantize F16 \
-             --chip bm1684x \
-             --test_input yolov5s_in_f32.npz \
-             --test_reference yolov5s_top_outputs.npz \
-             --model yolov5s_1684x_f16.bmodel
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: >-
+          gh release create "${{ env.TAG }}"
+          "./${{ env.FILE_PATH }}"
+          --generate-notes
+          --title "Release tpu-mlir_${{ env.TAG }}-${{ env.BUILD_TIME }}.whl"
 
-           ############ MLIR to int8 bmodel ##########
 
-          run_calibration.py yolov5s.mlir \
-              --dataset ../COCO2017 \
-              --input_num 100 \
-              -o yolov5s_cali_table
 
-          model_deploy.py \
-              --mlir yolov5s.mlir \
-              --quantize INT8 \
-              --calibration_table yolov5s_cali_table \
-              --chip bm1684x \
-              --test_input yolov5s_in_f32.npz \
-              --test_reference yolov5s_top_outputs.npz \
-              --tolerance 0.85,0.45 \
-              --model yolov5s_1684x_int8.bmodel
 
-           ############ Results Comparison ##########
+ 
 
-           detect_yolov5.py \
-              --input ../image/dog.jpg \
-              --model ../yolov5s.onnx \
-              --output dog_origin.jpg
-
-           detect_yolov5.py \
-              --input ../image/dog.jpg \
-              --model yolov5s_1684x_f16.bmodel \
-              --output dog_f16.jpg
-
-           detect_yolov5.py \
-              --input ../image/dog.jpg \
-              --model yolov5s_1684x_int8.bmodel \
-              --output dog_int8.jpg
-
-             '
+       
+         
+    
+        
 
 
 
