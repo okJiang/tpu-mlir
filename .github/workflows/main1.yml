@@ -1,62 +1,81 @@
-name: Update Pip and Build
-
+name: Reuse Docker Image
 
 on:
   push:
-   
+    tags:
+        - 'v*.*.*'  # 以 'v' 开头的标签名称，如 'v1.0.0'
+
 jobs:
-  build:
+  reuse_image:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    # - name: Set up Python
-    #   uses: actions/setup-python@v2
-    #   with:
-    #     python-version: 3.10
-
-    # - name: Upgrade pip
-    #   run: |
-    #     python -m pip install --upgrade pip
-
-    # - name: Build and Publish
-    #   env:
-    #     TWINE_USERNAME: __token__
-    #     TWINE_PASSWORD: ${{ secrets.PYPITOKEN }}
-    #   run: |
-       
-    #     python setup.py sdist 
-        
-    #     pip install twine
-
-     
-         
-    #     twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
-
-    #     twine upload dist/*  --verbose
+      - uses: actions/checkout@v3
+        with:
+           fetch-depth: 0
 
 
 
+      - name: Get Git Tag
+        id: get_git_tag
+        run: |
+            TAG=$(git describe --tags --abbrev=0)
+            echo "TAG=${TAG}" >> $GITHUB_ENV
 
 
+      - name: Get Date
+        id: get_date
+        run: |
+              echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
 
-    - name: Run Docker Container and YOLOv5 Test
-      run: |
-          docker run --privileged --name github_actions_test -v $PWD:/workspace sophgo/tpuc_dev:latest bash -c '
 
+      - name: Run Docker container
+        run: |
+          git describe --tags --always
+          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+          # find . -type f -name "*.tar.gz" -exec rm -f {} \;
+          #./release.sh
 
-          cd tpu-mlir
           source ./envsetup.sh
           ./build.sh
           python setup.py build
           python setup.py bdist_wheel
+          "
+
+
+      - name: Find and copy whl file
+        run: |
+          docker start myname1234
+          FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.whl" -print -quit)
+          if [ -n "$FILE_PATH" ]; then
+            docker cp myname1234:"$FILE_PATH" ./
+            ls -al
+            pwd
+          else
+            echo "File not found in container"
+          fi
+          FILE_PATH=${FILE_PATH#/workspace/}
+          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: >-
+          gh release create "${{ env.TAG }}"
+          "./${{ env.FILE_PATH }}"
+          --generate-notes
+          --title "Release tpu-mlir_${{ env.TAG }}-${{ env.BUILD_TIME }}.whl"
+
+
+
+
+ 
 
        
          
     
-             '
+        
 
 
 
