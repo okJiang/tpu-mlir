@@ -43,6 +43,7 @@ def collect_oneDNN_dependence():
 
 
 def release_packages_merge():
+    os.system("mkdir tpu_mlir_release")
     os.system("cp -r /workspace/tpu-mlir/install/lib  /workspace/tpu-mlir/tpu_mlir_release/")
     os.system("cp -r /workspace/tpu-mlir/install/python  /workspace/tpu-mlir/tpu_mlir_release/")
     os.system("cp -r /workspace/tpu-mlir/install/docs  /workspace/tpu-mlir/tpu_mlir_release/")
