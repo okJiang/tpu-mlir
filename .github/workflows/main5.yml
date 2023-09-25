@@ -1,0 +1,99 @@
+
+name: Release version
+
+on:
+  push:
+    tags:
+
+      - '*'
+
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+
+
+      - name: Get Git Tag
+        id: get_git_tag
+        run: |
+              TAG=$(git describe --tags --abbrev=0)
+              echo "TAG=${TAG}" >> $GITHUB_ENV
+
+      - name: Get date
+        id: get_date
+        run: |
+
+              echo "BUILD_TIME=$(date "+%Y%m%d")" >> $GITHUB_ENV
+
+
+      - name: Run Docker container
+        run: |
+              git describe --tags --always
+              docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+              # find . -type f -name "*.tar.gz" -exec rm -f {} \;
+              ./release.sh
+
+              "
+      - name: Find and copy .tar.gz file
+        run: |
+              docker start myname1234
+              FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.tar.gz" -print -quit)
+              if [ -n "$FILE_PATH" ]; then
+                docker cp myname1234:"$FILE_PATH" ./
+                ls -al
+                pwd
+              else
+                echo "File not found in container"
+              fi
+              FILE_PATH=${FILE_PATH#/workspace/}
+              echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+
+
+      - name: Release
+        env:
+            GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: >-
+            gh release create "${{ env.TAG }}"
+            "./${{ env.FILE_PATH }}"
+            --generate-notes
+            --title "Release tpu-mlir_${{ env.TAG }}-${{ env.BUILD_TIME }}.tar.gz"
+
+      - name: Run Docker container
+        run: |
+          git describe --tags --always
+          docker run --privileged --name myname1234 -v $PWD:/workspace sophgo/tpuc_dev:v2.2 /bin/bash -c "
+            # find . -type f -name "*.tar.gz" -exec rm -f {} \;
+            #./release.sh
+            
+
+          "
+
+      - name: Find and copy .whl file
+        run: |
+          docker start myname1234
+          FILE_PATH=$(docker exec myname1234 find /workspace -type f -name "*.whl" -print -quit)
+          if [ -n "$FILE_PATH" ]; then
+            docker cp myname1234:"$FILE_PATH" ./
+            ls -al
+            pwd
+          else
+            echo "File not found in container"
+          fi
+          FILE_PATH=${FILE_PATH#/workspace/}
+          echo "FILE_PATH=$FILE_PATH" >> $GITHUB_ENV
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: >-
+          gh release create "${{ env.TAG }}"
+          "./${{ env.FILE_PATH }}"
+          --generate-notes
+          --title "Release tpu-mlir_${{ env.GIT_SHORT_HASH }}-${{ env.BUILD_TIME }}.tar.gz"

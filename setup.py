@@ -3,12 +3,11 @@ import sys
 import os
 from setuptools import setup, find_packages
 from glob import glob
+import codecs
 import subprocess
 
 def collect_caffe_dependence():
 
-    cur_dir=os.system("pwd")
-    print(cur_dir)
 
     os.system("cp /usr/lib/x86_64-linux-gnu/libpython3.10.so.1.0 /workspace/tpu-mlir/install/lib")
     os.system("cp /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.74.0 /workspace/tpu-mlir/install/lib")
@@ -33,77 +32,113 @@ def collect_caffe_dependence():
     os.system("cp /usr/lib/x86_64-linux-gnu/libgcc_s.so.1  /workspace/tpu-mlir/install/lib")
     os.system("cp /usr/lib/x86_64-linux-gnu/libicudata.so.70  /workspace/tpu-mlir/install/lib")
     os.system("cp /usr/lib/x86_64-linux-gnu/libc.so.6 /workspace/tpu-mlir/install/lib")
-    os.system("cp -r /usr/local/python_packages/caffe  /workspace/tpu-mlir/install/lib")
-    print("cllect Done")
+    os.system("cp -r /usr/local/python_packages/caffe /workspace/tpu-mlir/install/lib")
+    print("caffe dependence cllect Done")
+
+def collect_oneDNN_dependence():
+    os.system("cp /usr/local/lib/libdnnl.so /workspace/tpu-mlir/install/lib")
+    os.system("cp /usr/local/lib/libdnnl.so.3 /workspace/tpu-mlir/install/lib")
+    os.system("cp /usr/local/lib/libdnnl.so.3.1 /workspace/tpu-mlir/install/lib")
+    print("oneDNN dependence cllect Done")
+
 
 def release_packages_merge():
+    os.system("cp -r /workspace/tpu-mlir/install/lib  /workspace/tpu-mlir/tpu_mlir_release/")
+    os.system("cp -r /workspace/tpu-mlir/install/python  /workspace/tpu-mlir/tpu_mlir_release/")
+    os.system("cp -r /workspace/tpu-mlir/install/docs  /workspace/tpu-mlir/tpu_mlir_release/")
+    os.system("cp -r /workspace/tpu-mlir/install/src   /workspace/tpu-mlir/tpu_mlir_release/")
+    os.system("cp -r /workspace/tpu-mlir/install/bin  /workspace/tpu-mlir/tpu_mlir_release/")
+    os.system("cp -r /workspace/tpu-mlir/regression  /workspace/tpu-mlir/tpu_mlir_release/")
+    os.system("cp -r /workspace/tpu-mlir/third_party/customlayer  /workspace/tpu-mlir/tpu_mlir_release/")
+    os.system("cp -r /workspace/tpu-mlir/install/lib/caffe  /workspace/tpu-mlir/tpu_mlir_release/")
+    print("release packages merge Done")
 
-    os.system("cp -r /workspace/tpu-mlir/install/lib  /workspace/tpu-mlir/tpu_mlir/")
-    os.system("cp -r /workspace/tpu-mlir/install/python  /workspace/tpu-mlir/tpu_mlir/")
-    os.system("cp -r /workspace/tpu-mlir/install/docs  /workspace/tpu-mlir/tpu_mlir/")
-    os.system("cp -r /workspace/tpu-mlir/install/src   /workspace/tpu-mlir/tpu_mlir/")
-    os.system("cp -r /workspace/tpu-mlir/install/bin  /workspace/tpu-mlir/tpu_mlir/")
-    os.system("cp -r /workspace/tpu-mlir/regression  /workspace/tpu-mlir/tpu_mlir/")
 
+# def iter_shared_objects():
+#     cur_dir = os.path.abspath(os.path.dirname(sys.argv[0]) or '.')
+#     for dirpath, dirnames, filenames in os.walk(cur_dir):
+#         for fn in filenames:
+#             if fn.endswith('.so'):
+#                 yield os.path.join(dirpath, fn)
 
-def iter_shared_objects():
-    cur_dir = os.path.abspath(os.path.dirname(sys.argv[0]) or '.')
-    for dirpath, dirnames, filenames in os.walk(cur_dir):
-        for fn in filenames:
-            if fn.endswith('.so'):
-                yield os.path.join(dirpath, fn)
+# #packages = ['tpu_perf']
+# so_list = list(iter_shared_objects())
 
-#packages = ['tpu_perf']
-so_list = list(iter_shared_objects())
+def show_readmefile():
 
+    here = os.path.abspath(os.path.dirname("/workspace/tpu-mlir/"))
+    with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
+        long_description = "\n" + fh.read()
+    print("show README file Done")
 
 def search_files(dir_path):
     """
-    获取所有文件
-    :param dir_path:文件夹路径
-    :return: 该文件夹下的所有文件的列表
+    Get all files
+    :param dir_path:files path
+    :return: List of all files in this folder
     """
     result = []
-    file_list = os.listdir(dir_path)  # 获取当前文件夹下的所有文件
+    file_list = os.listdir(dir_path)
     for file_name in file_list:
-        complete_file_name = os.path.join(dir_path, file_name)  # 获取包含路径的文件名
-        if os.path.isdir(complete_file_name):  # 如果是文件夹
-            result.extend(search_files(complete_file_name)) # 文件夹递归
-        if os.path.isfile(complete_file_name):  # 文件名判断是否为文件
-            result.append(complete_file_name)   # 添加文件路径到结果列表里
-            print(complete_file_name)           # 输出找到的文件的路径
+        complete_file_name = os.path.join(dir_path, file_name)
+        if os.path.isdir(complete_file_name):
+            result.extend(search_files(complete_file_name))
+        if os.path.isfile(complete_file_name):
+            result.append(complete_file_name)
+            print(complete_file_name)
     return result
 
-#list1 = list(search_files("/workspace/tpu-mlir/python"))
-#list2 = list(search_files("/workspace/tpu-mlir/regression"))
-list3 = list(search_files("/workspace/tpu-mlir/tpu_mlir/lib"))
-
-collect_caffe_dependence()
-release_packages_merge()
-setup(
-    name='tpu_mlir',
-    version='1.3',
-    author='sophgo',
-    description='tpu-mlir release pip',
-    author_email='dev@sophgo.com',
-    license='Apache',
 
 
+def tpu_mlir_setup():
 
-    platforms = 'any',
-    url='https://www.sophgo.com/',
-   # install_requires=['numpy'],
-    #packages=['tpu_mlir_release'],
-
-    include_package_data=True,
-    packages=find_packages(),
-
-  #  package_data={'regression': list2},
-     package_data={'': list3},
-   # py_modules=['__init__'],
-   # package_dir={"lib": "tpu_mlir_release"},
-     long_description_content_type="text/markdown",
+    list1 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/python"))
+    list2 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/regression"))
+    list3 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/lib"))
+    list4 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/docs"))
+    list5 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/src"))
+    list6 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/bin"))
+    list7 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/customlayer"))
+    list8 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/caffe"))
 
 
+    setup(
 
-)
+
+        name='tpu_mlir_release',
+        version='1.3',
+        author='sophgo',
+        description='tpu-mlir release pip',
+        author_email='dev@sophgo.com',
+        license='Apache',
+        platforms = 'unbuntu22.04',
+        url='https://github.com/sophgo/tpu-mlir',
+        install_requires=['numpy'],
+        include_package_data=True,
+        packages=['tpu_mlir_release'],
+        keywords=['python3.10', 'unbuntu22.04', 'linux','tpu-mlir'],
+        package_data={'': list3,'': list7, '': list4,'': list2,'': list6,'': list5,'': list1,'': list8},
+        long_description_content_type="text/markdown",
+        classifiers=[
+        'Intended Audience :: Developers',
+        'Programming Language :: Python :: 3.10',
+        'Topic :: Software Development'
+        ],
+        python_requires='==3.10',
+    )
+    print("release packages setup Done")
+
+
+def remove_tpu_mlir_release():
+    os.system("rm -r /workspace/tpu-mlir/tpu_mlir_release")
+
+def workflow():
+    show_readmefile()
+    collect_caffe_dependence()
+    collect_oneDNN_dependence()
+    release_packages_merge()
+    tpu_mlir_setup()
+   # remove_tpu_mlir_release()
+
+workflow()
+
