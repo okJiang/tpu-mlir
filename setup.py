@@ -131,7 +131,7 @@ def remove_tpu_mlir_release():
     os.system("rm -r /workspace/tpu-mlir/tpu_mlir_release")
 
 def workflow():
-    show_readmefile()
+  #  show_readmefile()
     collect_caffe_dependence()
     collect_oneDNN_dependence()
     release_packages_merge()
