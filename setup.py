@@ -1,3 +1,4 @@
+
 import re
 import sys
 import os
@@ -32,7 +33,7 @@ def collect_caffe_dependence():
     os.system("cp /usr/lib/x86_64-linux-gnu/libgcc_s.so.1  /workspace/tpu-mlir/install/lib")
     os.system("cp /usr/lib/x86_64-linux-gnu/libicudata.so.70  /workspace/tpu-mlir/install/lib")
     os.system("cp /usr/lib/x86_64-linux-gnu/libc.so.6 /workspace/tpu-mlir/install/lib")
-    os.system("cp -r /usr/local/python_packages/caffe /workspace/tpu-mlir/install/lib")
+    os.system("cp -r /usr/local/python_packages/caffe /workspace/tpu-mlir/install")
     print("caffe dependence cllect Done")
 
 def collect_oneDNN_dependence():
@@ -44,14 +45,19 @@ def collect_oneDNN_dependence():
 
 def release_packages_merge():
     os.system("mkdir tpu_mlir_release")
-    os.system("cp -r /workspace/tpu-mlir/install/lib  /workspace/tpu-mlir/tpu_mlir_release/")
-    os.system("cp -r /workspace/tpu-mlir/install/python  /workspace/tpu-mlir/tpu_mlir_release/")
-    os.system("cp -r /workspace/tpu-mlir/install/docs  /workspace/tpu-mlir/tpu_mlir_release/")
-    os.system("cp -r /workspace/tpu-mlir/install/src   /workspace/tpu-mlir/tpu_mlir_release/")
-    os.system("cp -r /workspace/tpu-mlir/install/bin  /workspace/tpu-mlir/tpu_mlir_release/")
-    os.system("cp -r /workspace/tpu-mlir/regression  /workspace/tpu-mlir/tpu_mlir_release/")
-    os.system("cp -r /workspace/tpu-mlir/third_party/customlayer  /workspace/tpu-mlir/tpu_mlir_release/")
-    os.system("cp -r /workspace/tpu-mlir/install/lib/caffe  /workspace/tpu-mlir/tpu_mlir_release/")
+    #os.system("cp -r /workspace/tpu-mlir/install/lib  /workspace/tpu-mlir/tpu_mlir_release")
+    os.system("find /workspace/tpu-mlir/install/lib/ -type f -name '*.so*' -exec cp {}  /workspace/tpu-mlir/tpu_mlir_release \;")
+    os.system("find /workspace/tpu-mlir/install/lib/ -type f -name '*.so.*' -exec cp {}  /workspace/tpu-mlir/tpu_mlir_release \;")
+    os.system("cp -r /workspace/tpu-mlir/install/python  /workspace/tpu-mlir/tpu_mlir_release")
+   # os.system("cp -r /workspace/tpu-mlir/install/docs  /workspace/tpu-mlir/tpu_mlir_release")
+    os.system("cp -r /workspace/tpu-mlir/install/src   /workspace/tpu-mlir/tpu_mlir_release")
+    os.system("cp -r /workspace/tpu-mlir/install/bin  /workspace/tpu-mlir/tpu_mlir_release")
+    os.system("cp -r /workspace/tpu-mlir/regression  /workspace/tpu-mlir/tpu_mlir_release")
+    os.system("cp -r /workspace/tpu-mlir/third_party/customlayer  /workspace/tpu-mlir/tpu_mlir_release")
+    os.system("cp -r /workspace/tpu-mlir/install/caffe   /workspace/tpu-mlir/tpu_mlir_release")
+    os.system("mkdir /workspace/tpu-mlir/tpu_mlir_release/lib")
+    os.system("find /workspace/tpu-mlir/tpu_mlir_release/ -type f -name '*.so.*' -exec mv {}  /workspace/tpu-mlir/tpu_mlir_release/lib \;")
+    os.system("find /workspace/tpu-mlir/tpu_mlir_release/ -type f -name '*.so*' -exec mv {}  /workspace/tpu-mlir/tpu_mlir_release/lib \;")
     print("release packages merge Done")
 
 
@@ -89,16 +95,18 @@ def search_files(dir_path):
             print(complete_file_name)
     return result
 
+
+
 def tpu_mlir_setup():
 
-    list1 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/python"))
-    list2 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/regression"))
-    list3 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/lib"))
-    list4 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/docs"))
-    list5 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/src"))
-    list6 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/bin"))
-    list7 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/customlayer"))
-    list8 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/caffe"))
+    list1 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/"))
+    # list2 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/regression"))
+    # list3 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/lib"))
+    # list4 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/docs"))
+    # list5 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/src"))
+    # list6 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/bin"))
+    # list7 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/customlayer"))
+    # list8 = list(search_files("/workspace/tpu-mlir/tpu_mlir_release/caffe"))
 
 
     setup(
@@ -110,20 +118,22 @@ def tpu_mlir_setup():
         description='tpu-mlir release pip',
         author_email='dev@sophgo.com',
         license='Apache',
-        platforms = 'unbuntu22.04',
+        platforms = 'any',
         url='https://github.com/sophgo/tpu-mlir',
-        install_requires=['numpy'],
+       # install_requires=['numpy'],
         include_package_data=True,
+
         packages=['tpu_mlir_release'],
+
         keywords=['python3.10', 'unbuntu22.04', 'linux','tpu-mlir'],
-        package_data={'': list3,'': list7, '': list4,'': list2,'': list6,'': list5,'': list1,'': list8},
+        package_data={'': list1},
         long_description_content_type="text/markdown",
         classifiers=[
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3.10',
         'Topic :: Software Development'
         ],
-        python_requires='==3.10',
+      #  python_requires='==3.10',
     )
     print("release packages setup Done")
 
@@ -132,7 +142,7 @@ def remove_tpu_mlir_release():
     os.system("rm -r /workspace/tpu-mlir/tpu_mlir_release")
 
 def workflow():
-  #  show_readmefile()
+    show_readmefile()
     collect_caffe_dependence()
     collect_oneDNN_dependence()
     release_packages_merge()
